@@ -1,7 +1,7 @@
 # river-plugin
 
 #### 介绍
-基于springboot的插件，开箱即用
+基于springboot的插件库，开箱即用
 
 #### 软件架构
 软件架构说明
