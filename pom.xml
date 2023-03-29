@@ -20,6 +20,7 @@
 
     <modules>
         <module>redstars-sharejdbc</module>
+        <module>redstars-tdengine</module>
     </modules>
 
     <properties>
@@ -29,6 +30,9 @@
         <redstars.version>1.0.0</redstars.version>
         <shardingsphere.version>5.2.0</shardingsphere.version>
         <hutool.version>5.7.22</hutool.version>
+        <tdengine.version>3.0.2</tdengine.version>
+        <fastjson2.vesion>2.0.9</fastjson2.vesion>
+        <mybatisplus.version>3.5.2</mybatisplus.version>
     </properties>
 
     <dependencyManagement>
@@ -45,6 +49,22 @@
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.vesion}</version>
+            </dependency>
+            <!--时序数据库-->
+            <dependency>
+                <groupId>com.taosdata.jdbc</groupId>
+                <artifactId>taos-jdbcdriver</artifactId>
+                <version>${tdengine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatisplus.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -52,8 +72,44 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>${fastjson2.vesion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>阿里云公共仓库</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
