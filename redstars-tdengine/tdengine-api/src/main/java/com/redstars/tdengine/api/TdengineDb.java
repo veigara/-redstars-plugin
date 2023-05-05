@@ -64,11 +64,13 @@ public class TdengineDb {
      * @date 2023/3/3 11:15
      */
     public Db use() {
+        log.debug("当前激活的时序数据源："+defaltDbName);
         return Db.use(DSFactory.get(defaltDbName));
     }
 
 
     public  Db use(String dsName){
+        log.debug("当前激活的时序数据源："+dsName);
         return Db.use(DSFactory.get(dsName));
     }
     public <T> List<T> list(String sql, Class<T> beanClass, Object... params) {

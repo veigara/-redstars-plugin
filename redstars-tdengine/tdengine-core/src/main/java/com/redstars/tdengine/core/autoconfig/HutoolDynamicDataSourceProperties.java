@@ -1,6 +1,5 @@
 package com.redstars.tdengine.core.autoconfig;
 
-import com.redstars.tdengine.core.autoconfig.beecp.BeeCpConfig;
 import com.redstars.tdengine.core.autoconfig.dbcp2.Dbcp2Config;
 import com.redstars.tdengine.core.autoconfig.druid.DruidConfig;
 import com.redstars.tdengine.core.autoconfig.hikari.HikariCpConfig;
@@ -34,15 +33,12 @@ public class HutoolDynamicDataSourceProperties {
     @NestedConfigurationProperty
     private HikariCpConfig hikari;
     @NestedConfigurationProperty
-    private BeeCpConfig beecp;
-    @NestedConfigurationProperty
     private Dbcp2Config dbcp2;
 
     public HutoolDynamicDataSourceProperties() {
         this.datasource = new LinkedHashMap();
         this.druid = new DruidConfig();
         this.hikari = new HikariCpConfig();
-        this.beecp = new BeeCpConfig();
         this.dbcp2 = new Dbcp2Config();
     }
 }
