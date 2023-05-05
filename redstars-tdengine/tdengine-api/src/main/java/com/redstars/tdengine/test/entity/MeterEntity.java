@@ -2,13 +2,15 @@ package com.redstars.tdengine.test.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @author : zhouhx
  * @date : 2023/3/29 10:26
  */
 @Data
 public class MeterEntity {
-    private Data ts;
+    private Date ts;
 
     private Long current;
 
