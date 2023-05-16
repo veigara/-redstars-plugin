@@ -11,12 +11,12 @@
     <parent>
         <groupId>com.redstars.plugin</groupId>
         <artifactId>redstars-plugin</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>com.redstars.plugin</groupId>
     <artifactId>redstars-sharejdbc</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
