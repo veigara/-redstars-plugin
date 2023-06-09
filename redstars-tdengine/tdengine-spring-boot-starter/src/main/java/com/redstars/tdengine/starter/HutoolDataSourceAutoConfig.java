@@ -44,8 +44,6 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
         DruidConfig druid = this.properties.getDruid();
         Dbcp2Config dbcp2 = this.properties.getDbcp2();
 
-        TdengineDataSource.addPrimaryDsName(this.properties.getPrimary());
-
         if (!datasource.isEmpty()) {
             log.info("开始配置全局tdengine数据源--------------------------------");
             // 设置组名
@@ -89,13 +87,12 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
                 }
                 TdengineDataSource.addDataSource(key,dsFactory);
 
-                //data.putAll(key, setting);
                 log.info("tdengine数据源名称："+key);
 
 
             }
-            //GlobalDSFactory.set(DSFactory.create(data));
-
+            TdengineDataSource.addPrimaryDsName(this.properties.getPrimary());
+            log.info("tdengine默认数据源名称："+this.properties.getPrimary());
             log.info("设置全局tdengine数据源完毕--------------------------------");
         }
     }
