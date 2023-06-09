@@ -16,7 +16,7 @@ import java.util.Map;
  * @author : zhouhx
  * @date : 2023/5/5 10:02
  */
-@ConfigurationProperties(prefix = "hutool.datasource.dynamic")
+@ConfigurationProperties(prefix = "tdengine.datasource.dynamic")
 @Data
 @Configuration
 // 找配置文件 先找jar包平级目录的 先加载.properties 找不到就找.yml 找不到再找classpath下的ignoreResourceNotFound=true是让他找不到文件的时候不报错继续往下找
@@ -37,8 +37,5 @@ public class HutoolDynamicDataSourceProperties {
 
     public HutoolDynamicDataSourceProperties() {
         this.datasource = new LinkedHashMap();
-        this.druid = new DruidConfig();
-        this.hikari = new HikariCpConfig();
-        this.dbcp2 = new Dbcp2Config();
     }
 }

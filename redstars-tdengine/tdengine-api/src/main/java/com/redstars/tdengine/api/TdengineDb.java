@@ -13,10 +13,14 @@ import cn.hutool.db.handler.RsHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.redstars.tdengine.core.annotation.TdengineCovert;
+import com.redstars.tdengine.core.autoconfig.TdengineDataSource;
 import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.utils.StrUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
+
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,23 +40,9 @@ public class TdengineDb {
     private static final long serialVersionUID = -3378415769645309514L;
     private static final String ERRFILENAME = "时序数据库tdengine sql异常";
     private static final String SQLNAME = "时序数据库tdengine";
-    private String defaltDbName = null;
 
     public TdengineDb(){
 
-    }
-    /**
-     *
-     *
-     * @author zhuohx
-     * @param  defaltDbName 默认数据源名称
-     * @return * @return: null
-     * @throws
-     * @version 1.0
-     * @since  2023/5/5 16:32
-     */
-    public TdengineDb(String defaltDbName) {
-        this.defaltDbName = defaltDbName;
     }
 
     /**
@@ -63,17 +53,38 @@ public class TdengineDb {
      * @parms []
      * @date 2023/3/3 11:15
      */
-    public Db use() {
+    public Db use() throws SQLException {
+        /**
+         * 默认数据源
+         */
+        String defaltDbName = TdengineDataSource.getPrimaryDsName();
+
+        if(ObjectUtil.isEmpty(defaltDbName)){
+            throw new SQLException("未配置默认数据源");
+        }
+
         log.debug("当前激活的时序数据源："+defaltDbName);
-        return Db.use(DSFactory.get(defaltDbName));
+
+        DSFactory dsFactory = TdengineDataSource.getPrimaryDataSource();
+        DataSource dataSource = dsFactory.getDataSource();
+        dsFactory.getDataSource();
+        return Db.use(dataSource);
     }
 
 
-    public  Db use(String dsName){
+    public  Db use(String dsName) throws SQLException {
+        if(ObjectUtil.isEmpty(dsName)){
+            return use();
+        }
+        DSFactory dsFactory = TdengineDataSource.getDataSource(dsName);
+        DataSource dataSource = dsFactory.getDataSource();
+        if(ObjectUtil.isEmpty(dataSource)){
+            throw new SQLException(String.format("数据源:%s不存在",dsName));
+        }
         log.debug("当前激活的时序数据源："+dsName);
-        return Db.use(DSFactory.get(dsName));
+        return Db.use(dataSource);
     }
-    public <T> List<T> list(String sql, Class<T> beanClass, Object... params) {
+    public <T> List<T> list(String sql, Class<T> beanClass, Object... params){
         return this.list(null,sql,beanClass,params);
     }
     /**
@@ -84,9 +95,9 @@ public class TdengineDb {
      * @parms [sql, beanClass, params]
      * @date 2023/3/3 13:47
      */
-    public <T> List<T> list(String dbName,String sql, Class<T> beanClass, Object... params) {
+    public <T> List<T> list(String dbName,String sql, Class<T> beanClass, Object... params)  {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             List<T> res = db.query(sql, beanClass, params);
             return covertToList(res, beanClass);
@@ -104,7 +115,7 @@ public class TdengineDb {
 
     public List<Entity> list(String dbName,String sql, Map<String, Object> params) {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             return db.query(sql, params);
         } catch (SQLException e) {
@@ -120,7 +131,7 @@ public class TdengineDb {
 
     public List<Entity> list(String dbName,String sql, Object... params) {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             return db.query(sql, params);
         } catch (SQLException e) {
@@ -245,7 +256,7 @@ public class TdengineDb {
 
     public Entity getOne(String dbName, String sql, Object... params) {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             return db.queryOne(sql, params);
         } catch (SQLException e) {
@@ -269,7 +280,7 @@ public class TdengineDb {
      */
     public <T> T getOne(String dbName,String sql, Class<T> beanClass, Object... params) {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             T res = (T) db.query(sql, (RsHandler) (new BeanHandler(beanClass)), params);
             return covertObj(res, beanClass);
@@ -285,7 +296,7 @@ public class TdengineDb {
     }
     public Number getNumber(String dbName,String sql, Object... params) {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             return db.queryNumber(sql, params);
         } catch (SQLException e) {
@@ -299,7 +310,7 @@ public class TdengineDb {
     }
     public String getString(String dbName,String sql, Object... params) throws SQLException {
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
             return db.queryString(sql, params);
         } catch (SQLException e) {
@@ -326,7 +337,7 @@ public class TdengineDb {
         PreparedStatement pstmt = null;
         //  String sql="insert into service_data_station_HN0001 using service_data_station tags('HN0001') values(?,?,?,?,?,?,?,?,?,?,?)";
         try {
-            Db db = ObjectUtil.isNotEmpty(dbName)?use(dbName):use();
+            Db db = use(dbName);
             conn = db.getConnection();
             pstmt = conn.prepareStatement(sql);
             log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));

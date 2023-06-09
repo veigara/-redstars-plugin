@@ -2,9 +2,8 @@ package com.redstars.tdengine.core.autoconfig.hikari;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.setting.Setting;
+import com.redstars.tdengine.core.autoconfig.InitSetting;
 import lombok.Data;
-
-import java.util.Properties;
 
 /**
  * @author : zhouhx
@@ -12,7 +11,7 @@ import java.util.Properties;
  * @date : 2023/5/5 10:08
  */
 @Data
-public class HikariCpConfig {
+public class HikariCpConfig implements InitSetting {
     private String catalog;
     private String connectionTimeout;
     private String validationTimeout;
@@ -51,9 +50,11 @@ public class HikariCpConfig {
      * @version 1.0
      * @since  2023/5/5 10:46
      */
+    @Override
     public Setting  covertSetting(){
 
         Setting setting = new Setting();
+
         if(ObjectUtil.isNotEmpty(catalog)){
             setting.put("catalog",catalog);
         }

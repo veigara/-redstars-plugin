@@ -2,6 +2,7 @@ package com.redstars.tdengine.core.autoconfig.dbcp2;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.setting.Setting;
+import com.redstars.tdengine.core.autoconfig.InitSetting;
 import lombok.Data;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.Set;
  * @date : 2023/5/5 10:10
  */
 @Data
-public class Dbcp2Config {
+public class Dbcp2Config implements InitSetting {
     private String defaultAutoCommit;
     private String defaultReadOnly;
     private String defaultTransactionIsolation;
@@ -63,6 +64,7 @@ public class Dbcp2Config {
      * @version 1.0
      * @since  2023/5/5 10:46
      */
+    @Override
     public Setting covertSetting() {
 
         Setting setting = new Setting();

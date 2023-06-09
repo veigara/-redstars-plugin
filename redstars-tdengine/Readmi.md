@@ -20,7 +20,7 @@ INSERT INTO test.service_data_station_HN0001  USING test.service_data_station ta
 目前只支持hikari，druid,dbcp2数据源
 --------配置yml----------
 ````
-hutool:
+tdengine:
   datasource:
     dynamic: # 多数据源配置
       hikari: # hikari 【连接池】相关的全局配置
