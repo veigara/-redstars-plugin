@@ -31,7 +31,7 @@
         <redstars.version>1.0.0</redstars.version>
         <shardingsphere.version>5.2.0</shardingsphere.version>
         <hutool.version>5.7.22</hutool.version>
-        <tdengine.version>3.0.2</tdengine.version>
+        <tdengine.version>3.2.1</tdengine.version>
         <fastjson2.vesion>2.0.9</fastjson2.vesion>
         <mybatisplus.version>3.5.2</mybatisplus.version>
     </properties>

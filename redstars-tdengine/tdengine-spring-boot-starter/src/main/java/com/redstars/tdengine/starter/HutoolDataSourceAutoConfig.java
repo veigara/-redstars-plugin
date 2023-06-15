@@ -93,7 +93,7 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
             }
             TdengineDataSource.addPrimaryDsName(this.properties.getPrimary());
             log.info("tdengine默认数据源名称："+this.properties.getPrimary());
-            log.info("设置全局tdengine数据源完毕--------------------------------");
+            log.info("配置全局tdengine数据源完毕--------------------------------");
         }
     }
 
