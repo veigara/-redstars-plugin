@@ -2,12 +2,11 @@ package com.redstars.tdengine.example;
 
 import cn.hutool.db.Page;
 import com.alibaba.fastjson2.JSONObject;
-import com.redstars.tdengine.api.TdengineDb2;
+import com.redstars.tdengine.api.TdengineDb;
 import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.conditions.query.TdengineQueryWrapper;
 import com.redstars.tdengine.example.entity.MeterEntity;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 /**
@@ -16,7 +15,7 @@ import java.util.List;
  * @date : 2023/3/3 14:13
  */
 public class AppcationTest {
-    private static TdengineDb2 db = new TdengineDb2();
+    private static TdengineDb db = new TdengineDb();
 
     public static void save(){
         MeterEntity meterEntity = new MeterEntity();
@@ -59,7 +58,7 @@ public class AppcationTest {
     }
 
     public  static void queryOneEntity() {
-        TdengineDb2 db2 = new TdengineDb2();
+        TdengineDb db2 = new TdengineDb();
         TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
         queryWrapper.select("last(ts) as ts, *");
         MeterEntity entity = db.getOne(queryWrapper);
