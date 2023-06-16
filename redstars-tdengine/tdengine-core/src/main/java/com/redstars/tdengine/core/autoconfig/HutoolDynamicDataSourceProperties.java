@@ -3,12 +3,12 @@ package com.redstars.tdengine.core.autoconfig;
 import com.redstars.tdengine.core.autoconfig.dbcp2.Dbcp2Config;
 import com.redstars.tdengine.core.autoconfig.druid.DruidConfig;
 import com.redstars.tdengine.core.autoconfig.hikari.HikariCpConfig;
+import com.redstars.tdengine.core.autoconfig.tomcat.TomcatJdbcPoolConfig;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,7 +33,9 @@ public class HutoolDynamicDataSourceProperties {
     @NestedConfigurationProperty
     private HikariCpConfig hikari;
     @NestedConfigurationProperty
-    private Dbcp2Config dbcp2;
+    private TomcatJdbcPoolConfig tomcat;
+    @NestedConfigurationProperty
+    private Dbcp2Config dbcp;
 
     public HutoolDynamicDataSourceProperties() {
         this.datasource = new LinkedHashMap();

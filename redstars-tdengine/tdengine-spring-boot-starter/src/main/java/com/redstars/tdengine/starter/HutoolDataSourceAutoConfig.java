@@ -6,6 +6,7 @@ import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.ds.dbcp.DbcpDSFactory;
 import cn.hutool.db.ds.druid.DruidDSFactory;
 import cn.hutool.db.ds.hikari.HikariDSFactory;
+import cn.hutool.db.ds.tomcat.TomcatDSFactory;
 import cn.hutool.setting.Setting;
 import com.redstars.tdengine.api.TdengineDb;
 import com.redstars.tdengine.core.autoconfig.HutoolDataSourceProperty;
@@ -14,6 +15,7 @@ import com.redstars.tdengine.core.autoconfig.TdengineDataSource;
 import com.redstars.tdengine.core.autoconfig.dbcp2.Dbcp2Config;
 import com.redstars.tdengine.core.autoconfig.druid.DruidConfig;
 import com.redstars.tdengine.core.autoconfig.hikari.HikariCpConfig;
+import com.redstars.tdengine.core.autoconfig.tomcat.TomcatJdbcPoolConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -42,7 +44,8 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
         Map<String, HutoolDataSourceProperty> datasource = this.properties.getDatasource();
         HikariCpConfig hikari = this.properties.getHikari();
         DruidConfig druid = this.properties.getDruid();
-        Dbcp2Config dbcp2 = this.properties.getDbcp2();
+        TomcatJdbcPoolConfig tomcat = this.properties.getTomcat();
+        Dbcp2Config dbcp = this.properties.getDbcp();
 
         if (!datasource.isEmpty()) {
             log.info("开始配置全局tdengine数据源--------------------------------");
@@ -57,9 +60,13 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
                 log.info("设置tdengine连接池：Druid--------------------------------");
                 poolSetting = druid.covertSetting();
             }
-            if(ObjectUtil.isNotEmpty(dbcp2)){
-                log.info("设置tdengine连接池：Dbcp2--------------------------------");
-                poolSetting = dbcp2.covertSetting();
+            if(ObjectUtil.isNotEmpty(tomcat)){
+                log.info("设置tdengine连接池：Tomcat JDBC Pool --------------------------------");
+                poolSetting = tomcat.covertSetting();
+            }
+            if(ObjectUtil.isNotEmpty(dbcp)){
+                log.info("设置tdengine连接池：DBCP--------------------------------");
+                poolSetting = dbcp.covertSetting();
             }
             if(ObjectUtil.isEmpty(poolSetting)){
                 log.info("设置tdengine默认连接池：HikariCp--------------------------------");
@@ -79,7 +86,10 @@ public class HutoolDataSourceAutoConfig implements ApplicationRunner {
                 if(ObjectUtil.isNotEmpty(druid)){
                     dsFactory = new DruidDSFactory(setting);
                 }
-                if(ObjectUtil.isNotEmpty(dbcp2)){
+                if(ObjectUtil.isNotEmpty(tomcat)){
+                    dsFactory = new TomcatDSFactory(setting);
+                }
+                if(ObjectUtil.isNotEmpty(dbcp)){
                     dsFactory = new DbcpDSFactory(setting);
                 }
                 if(ObjectUtil.isEmpty(poolSetting)){
