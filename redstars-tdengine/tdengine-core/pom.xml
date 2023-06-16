@@ -16,6 +16,7 @@
         <dependency>
             <groupId>com.taosdata.jdbc</groupId>
             <artifactId>taos-jdbcdriver</artifactId>
+            <version>${tdengine.version}</version>
         </dependency>
 
         <dependency>
