@@ -9,6 +9,8 @@ import com.redstars.tdengine.example.entity.MeterEntity;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 /**
  * @author : zhouhx
  * 时序数据库测试案例
@@ -32,10 +34,73 @@ public class AppcationTest {
 
     public static void save1(){
         String sql = "INSERT INTO d25 USING meters tags(6,'California.Sunnyvale') VALUES (?, ?,?, ?);";
-        boolean b =  db.insertOrUpdate(sql, System.currentTimeMillis(), 11.55, 116, 0.9);
+        boolean b =  db.insertOrUpdate(sql, System.currentTimeMillis(), 11.55, 118, 0.9);
         System.err.println("sql更新或者插入结果："+b);
     }
 
+    public static  void remove(){
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.eq("voltage",118);
+        boolean res = db.remove(queryWrapper);
+        System.err.println("删除结果："+JSONObject.toJSONString(res));
+    }
+
+    public  static void queryOneClass() {
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.select("last(ts) as ts, *");
+        queryWrapper.eq("voltage",116);
+        MeterEntity entity = db.getOne(queryWrapper);
+        System.err.println("queryOneClass结果："+JSONObject.toJSONString(entity));    }
+
+    public  static void queryOne() {
+        String sql = "select last(ts),* from meters";
+        MeterEntity entity = (MeterEntity) db.getOne(sql, MeterEntity.class);
+        System.err.println("queryOne结果："+JSONObject.toJSONString(entity));
+    }
+
+    public  static void queryOneEntity() {
+        TdengineDb db2 = new TdengineDb();
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.select("last(ts) as ts, *");
+        MeterEntity entity = db.getOne(queryWrapper);
+        System.err.println("只查询一条结果："+JSONObject.toJSONString(entity));
+    }
+
+    public static void getMap(){
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.select("last(ts) as ts, *");
+        queryWrapper.eq("voltage",116);
+        Map<String, Object> map = db.getMap(queryWrapper);
+        System.err.println("getMap结果："+JSONObject.toJSONString(map));
+    }
+
+    public static void count(){
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        long count = db.count(queryWrapper);
+        System.err.println("countNum结果："+JSONObject.toJSONString(count));
+    }
+
+    public static void getNumber(){
+        String sql = "select count(*) from  meters";
+        Number number = db.getNumber(sql);
+        System.err.println("getNumber查询："+number.toString());
+
+    }
+
+    public static void getString(){
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.select("last(ts) as ts");
+        queryWrapper.eq("voltage",116);
+        String s = db.getString(queryWrapper);
+        System.err.println("getString查询："+s);
+    }
+
+    public static void getList(){
+        TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
+        queryWrapper.eq("voltage",116);
+        List<MeterEntity> list = db.list(queryWrapper);
+        System.err.println("getList结果："+JSONObject.toJSONString(list));
+    }
     /**
      *
      * @author zhuohx
@@ -51,25 +116,12 @@ public class AppcationTest {
         System.err.println("查询所有数据集结果："+JSONObject.toJSONString(list));
     }
 
-    public  static void queryOne() {
-        String sql = "select last(ts),* from test.meters";
-        MeterEntity entity = (MeterEntity) db.getOne(sql, MeterEntity.class);
-        System.err.println("只查询一条结果："+JSONObject.toJSONString(entity));
-    }
-
-    public  static void queryOneEntity() {
-        TdengineDb db2 = new TdengineDb();
+    public static void getPage(){
         TdengineQueryWrapper<MeterEntity> queryWrapper = new TdengineQueryWrapper<>(MeterEntity.class);
-        queryWrapper.select("last(ts) as ts, *");
-        MeterEntity entity = db.getOne(queryWrapper);
-        System.err.println("只查询一条结果："+JSONObject.toJSONString(entity));
-    }
 
-    public static void count(){
-        String sql = "select count(*) from  test.service_data_station_HN0001";
-        Number number = db.getNumber(sql);
-        System.err.println("总数查询："+number.toString());
+        PageResult<MeterEntity> page = db.page(new Page(1, 100),queryWrapper);
 
+        System.err.println("getPage分页结果："+ page);
     }
 
     public static void page(){
@@ -78,5 +130,6 @@ public class AppcationTest {
 
         System.err.println("tdengine 分页结果："+ page);
     }
+
 
 }

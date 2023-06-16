@@ -91,7 +91,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:23
      */
-    public  boolean remove(TdengineQueryWrapper<Object> queryWrapper){
+    public  boolean remove(TdengineQueryWrapper<?> queryWrapper){
         return this.remove(null,queryWrapper);
     }
 
@@ -106,7 +106,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:23
      */
-    public abstract boolean remove(String dsName, TdengineQueryWrapper<Object> queryWrapper);
+    public abstract boolean remove(String dsName, TdengineQueryWrapper<?> queryWrapper);
 
     /**
      *
@@ -183,7 +183,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:26
      */
-    public  Map<String, Object> getMap(TdengineQueryWrapper<Object> queryWrapper){
+    public  Map<String, Object> getMap(TdengineQueryWrapper<?> queryWrapper){
         return this.getMap(null,queryWrapper);
     }
 
@@ -198,7 +198,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:26
      */
-    public abstract Map<String, Object> getMap(String dsName,TdengineQueryWrapper<Object> queryWrapper);
+    public abstract Map<String, Object> getMap(String dsName,TdengineQueryWrapper<?> queryWrapper);
 
     /**
      *
@@ -210,7 +210,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:27
      */
-    public  long count(TdengineQueryWrapper<Object> queryWrapper){
+    public  long count(TdengineQueryWrapper<?> queryWrapper){
         return this.count(null,queryWrapper);
     }
 
@@ -225,7 +225,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:27
      */
-    public abstract long count(String dsName,TdengineQueryWrapper<Object> queryWrapper);
+    public abstract long count(String dsName,TdengineQueryWrapper<?> queryWrapper);
 
     public Number getNumber(String sql, Object... params) {
         return this.getNumber(null,sql,params);
@@ -245,7 +245,7 @@ public abstract class TdengineSevice{
      */
     public abstract Number getNumber(String dbName,String sql, Object... params);
 
-    public  Number getNumber(TdengineQueryWrapper<Object> queryWrapper){
+    public  Number getNumber(TdengineQueryWrapper<?> queryWrapper){
         return this.getNumber(null,queryWrapper);
     }
 
@@ -260,7 +260,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:08
      */
-    public abstract Number getNumber(String dsName,TdengineQueryWrapper<Object> queryWrapper);
+    public abstract Number getNumber(String dsName,TdengineQueryWrapper<?> queryWrapper);
 
     public String getString(String sql, Object... params) throws SQLException {
         return this.getString(null,sql,params);
@@ -280,7 +280,7 @@ public abstract class TdengineSevice{
      */
     public abstract String getString(String dbName,String sql, Object... params);
 
-    public  String getString(TdengineQueryWrapper<Object> queryWrapper){
+    public  String getString(TdengineQueryWrapper<?> queryWrapper){
         return this.getString(null,queryWrapper);
     }
 
@@ -295,7 +295,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:18
      */
-    public abstract String getString(String dbName,TdengineQueryWrapper<Object> queryWrapper);
+    public abstract String getString(String dbName,TdengineQueryWrapper<?> queryWrapper);
 
     /**
      *
@@ -321,7 +321,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:45
      */
-    public  List<Entity> listMaps(TdengineQueryWrapper<Object> queryWrapper){
+    public  List<Entity> listMaps(TdengineQueryWrapper<?> queryWrapper){
         return this.listMaps(null,queryWrapper);
     }
 
@@ -405,7 +405,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:45
      */
-    public abstract List<Entity> listMaps(String dsName,TdengineQueryWrapper<Object> queryWrapper);
+    public abstract List<Entity> listMaps(String dsName,TdengineQueryWrapper<?> queryWrapper);
 
     /**
      *

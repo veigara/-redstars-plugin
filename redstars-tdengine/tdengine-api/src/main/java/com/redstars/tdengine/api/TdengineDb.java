@@ -225,7 +225,7 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public Map<String, Object> getMap(String dsName, TdengineQueryWrapper<Object> queryWrapper) {
+    public Map<String, Object> getMap(String dsName, TdengineQueryWrapper<?> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
             log.debug(SQLNAME+" sql:{}", sql);
@@ -237,21 +237,24 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public long count(String dsName, TdengineQueryWrapper<Object> queryWrapper) {
+    public long count(String dsName, TdengineQueryWrapper<?> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
             sql = String.format("select count(*) from (%s)a",sql);
             log.debug(SQLNAME+" sql:{}", sql);
-            Number number = getNumber(dsName, sql, queryWrapper.getEntityClass());
+            Number number = getNumber(dsName, sql);
+            if(ObjectUtil.isEmpty(number)){
+                return 0L;
+            }
             return number.longValue();
         } catch (Exception e) {
             log.error("count sql error",e);
         }
-        return 0;
+        return 0L;
     }
 
     @Override
-    public Number getNumber(String dsName, TdengineQueryWrapper<Object> queryWrapper) {
+    public Number getNumber(String dsName, TdengineQueryWrapper<?> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
             log.debug(SQLNAME+" sql:{}", sql);
@@ -263,11 +266,11 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public String getString(String dbName, TdengineQueryWrapper<Object> queryWrapper) {
+    public String getString(String dbName, TdengineQueryWrapper<?> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
             log.debug(SQLNAME+" sql:{}", sql);
-            return getString(dbName, sql, queryWrapper.getEntityClass());
+            return getString(dbName, sql, null);
         } catch (Exception e) {
             log.error("getNumber sql error",e);
         }
@@ -287,7 +290,7 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public List<Entity> listMaps(String dsName, TdengineQueryWrapper<Object> queryWrapper) {
+    public List<Entity> listMaps(String dsName, TdengineQueryWrapper<?> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
             log.debug(SQLNAME+" sql:{}", sql);
