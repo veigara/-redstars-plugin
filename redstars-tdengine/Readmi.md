@@ -54,3 +54,122 @@ tdengine:
           password: taosdata
           #driver-class-name: com.taosdata.jdbc.rs.RestfulDriver
 ````
+tdengine:
+datasource:
+dynamic: # 多数据源配置
+#      druid:
+#        # 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时
+#        initialSize: 0
+#        # 最大连接池数量
+#        maxActive: 8
+#        # 最小连接池数量
+#        minIdle: 0
+#        # 获取连接时最大等待时间，单位毫秒。配置了maxWait之后， 缺省启用公平锁，并发效率会有所下降， 如果需要可以通过配置useUnfairLock属性为true使用非公平锁。
+#        maxWait: 0
+#        # 是否缓存preparedStatement，也就是PSCache。 PSCache对支持游标的数据库性能提升巨大，比如说oracle。 在mysql5.5以下的版本中没有PSCache功能，建议关闭掉。作者在5.5版本中使用PSCache，通过监控界面发现PSCache有缓存命中率记录， 该应该是支持PSCache。
+#        poolPreparedStatements: false
+#        # 要启用PSCache，必须配置大于0，当大于0时， poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题， 可以把这个数值配置大一些，比如说100
+#        maxOpenPreparedStatements: -1
+#        # 用来检测连接是否有效的sql，要求是一个查询语句。 如果validationQuery为null，testOnBorrow、testOnReturn、 testWhileIdle都不会其作用。
+#        validationQuery: SELECT 1
+#        # 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。
+#        testOnBorrow: true
+#        # 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+#        testOnReturn: false
+#        # 建议配置为true，不影响性能，并且保证安全性。 申请连接的时候检测，如果空闲时间大于 timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+#        testWhileIdle: false
+#        # 有两个含义： 1) Destroy线程会检测连接的间隔时间 2) testWhileIdle的判断依据，详细看testWhileIdle属性的说明
+#        timeBetweenEvictionRunsMillis: 60000
+#        # 物理连接初始化的时候执行的sql
+#        connectionInitSqls: SELECT 1
+#        # 属性类型是字符串，通过别名的方式配置扩展插件， 常用的插件有： 监控统计用的filter:stat  日志用的filter:log4j 防御sql注入的filter:wall
+#        filters: stat
+#        # 类型是List<com.alibaba.druid.filter.Filter>， 如果同时配置了filters和proxyFilters， 是组合关系，并非替换关系
+#        proxyFilters:
+#      tomcat:
+#        # (boolean) 连接池创建的连接的默认的auto-commit 状态
+#        defaultAutoCommit: true
+#        # (boolean) 连接池创建的连接的默认的read-only 状态。 如果没有设置则setReadOnly 方法将不会被调用。 ( 某些驱动不支持只读模式， 比如：Informix)
+#        defaultReadOnly: false
+#        # (int) 初始化连接： 连接池启动时创建的初始化连接数量，1。2 版本后支持
+#        initialSize: 10
+#        # (int) 最大活动连接： 连接池在同一时间能够分配的最大活动连接的数量， 如果设置为非正数则表示不限制
+#        maxActive: 100
+#        # (int) 最大空闲连接： 连接池中容许保持空闲状态的最大连接数量， 超过的空闲连接将被释放， 如果设置为负数表示不限制 如果启用，将定期检查限制连接，如果空闲时间超过minEvictableIdleTimeMillis 则释放连接 （ 参考testWhileIdle ）
+#        maxIdle: 8
+#        # (int) 最小空闲连接： 连接池中容许保持空闲状态的最小连接数量， 低于这个数量将创建新的连接， 如果设置为0 则不创建 如果连接验证失败将缩小这个值（ 参考testWhileIdle ）
+#        minIdle: 0
+#        # (int) 最大等待时间： 当没有可用连接时， 连接池等待连接被归还的最大时间( 以毫秒计数)， 超过时间则抛出异常， 如果设置为-1 表示无限等待
+#        maxWait: 30000
+#        # (String) SQL 查询， 用来验证从连接池取出的连接， 在将连接返回给调用者之前。 如果指定， 则查询必须是一个SQL SELECT 并且必须返回至少一行记录 查询不必返回记录，但这样将不能抛出SQL异常
+#        validationQuery: SELECT 1
+#        # (boolean) 指明是否在从池中取出连接前进行检验， 如果检验失败， 则从池中去除连接并尝试取出另一个。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串 参考validationInterval以获得更有效的验证
+#        testOnBorrow: false
+#        # (boolean) 指明是否在归还到池中前进行检验 注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
+#        testOnReturn: false
+#        # (boolean) 指明连接是否被空闲连接回收器( 如果有) 进行检验。 如果检测失败， 则连接将被从池中去除。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
+#        testWhileIdle: false
+      dbcp:
+          # (boolean) 连接池创建的连接的默认的auto-commit 状态
+          defaultAutoCommit: true
+          # (boolean) 连接池创建的连接的默认的read-only 状态。 如果没有设置则setReadOnly 方法将不会被调用。 ( 某些驱动不支持只读模式， 比如：Informix)
+          defaultReadOnly: false
+          # (int) 初始化连接： 连接池启动时创建的初始化连接数量，1。2 版本后支持
+          initialSize: 10
+          # (int) 最大活动连接： 连接池在同一时间能够分配的最大活动连接的数量， 如果设置为非正数则表示不限制
+          maxActive: 100
+          # (int) 最大空闲连接： 连接池中容许保持空闲状态的最大连接数量， 超过的空闲连接将被释放， 如果设置为负数表示不限制 如果启用，将定期检查限制连接，如果空闲时间超过minEvictableIdleTimeMillis 则释放连接 （ 参考testWhileIdle ）
+          maxIdle: 8
+          # (int) 最小空闲连接： 连接池中容许保持空闲状态的最小连接数量， 低于这个数量将创建新的连接， 如果设置为0 则不创建 如果连接验证失败将缩小这个值（ 参考testWhileIdle ）
+          minIdle: 0
+          # (int) 最大等待时间： 当没有可用连接时， 连接池等待连接被归还的最大时间( 以毫秒计数)， 超过时间则抛出异常， 如果设置为-1 表示无限等待
+          maxWait: 30000
+          # (String) SQL 查询， 用来验证从连接池取出的连接， 在将连接返回给调用者之前。 如果指定， 则查询必须是一个SQL SELECT 并且必须返回至少一行记录 查询不必返回记录，但这样将不能抛出SQL异常
+          validationQuery: SELECT 1
+          # (boolean) 指明是否在从池中取出连接前进行检验， 如果检验失败， 则从池中去除连接并尝试取出另一个。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串 参考validationInterval以获得更有效的验证
+          testOnBorrow: false
+          # (boolean) 指明是否在归还到池中前进行检验 注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
+          testOnReturn: false
+          # (boolean) 指明连接是否被空闲连接回收器( 如果有) 进行检验。 如果检测失败， 则连接将被从池中去除。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
+          testWhileIdle: false
+      primary: group_tdengine
+      datasource:
+        group_tdengine:
+          url: jdbc:TAOS-RS://192.168.2.60:6041/test
+          username: root
+          password: taosdata
+          driver-class-name: com.taosdata.jdbc.rs.RestfulDriver
+#        group_tdengine2:
+#          url: jdbc:TAOS://127.0.0.1:6041/test?charset=UTF-8
+#          username: root
+#          password: taosdata
+#          #driver-class-name: com.taosdata.jdbc.rs.RestfulDriver
+
+
+<!--druid连接池-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.2.15</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jdbc -->
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jdbc</artifactId>
+            <version>10.1.7</version>
+        </dependency>
+        <!--dbcp数据库连接池-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
