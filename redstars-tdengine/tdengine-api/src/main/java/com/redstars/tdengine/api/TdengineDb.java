@@ -1,6 +1,9 @@
 package com.redstars.tdengine.api;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.PageUtil;
 import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
@@ -13,11 +16,9 @@ import com.redstars.tdengine.core.autoconfig.TdengineDataSource;
 import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.conditions.query.TdengineQueryWrapper;
 import com.redstars.tdengine.core.enums.SqlTypeEnum;
-import com.redstars.tdengine.core.exception.TdengineException;
 import com.redstars.tdengine.core.toolkit.TdengineResultHelper;
 import com.redstars.tdengine.core.toolkit.TdengineSqlHelper;
 import com.redstars.tdengine.core.vo.TdengineSqlVo;
-import com.taosdata.jdbc.ws.TSWSPreparedStatement;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import javax.sql.DataSource;
@@ -388,6 +389,58 @@ public class TdengineDb extends TdengineSevice {
         }
 
         return result;
+    }
+
+    @Override
+    public <T> List<T> batchList(String dbName, Page page, Class<T> beanClass, String sql, Object... params) {
+        int totalSize = 0;
+        List<T> resList = new ArrayList<>();
+        try {
+            StringBuilder order = new StringBuilder("");
+            if(ArrayUtil.isNotEmpty(page.getOrders())){
+                order.append(" order by ");
+                for (int i = 0; i < page.getOrders().length; i++) {
+                    if(i != page.getOrders().length-1){
+                        order.append( page.getOrders()[i].toString()).append(" ,");
+                    }else{
+                        order.append( page.getOrders()[i].toString());
+                    }
+                }
+            }
+
+            //计算总条数
+            int from = sql.toLowerCase().indexOf("from");
+
+            StringBuilder countSql= new StringBuilder("select count(*)  ").append(sql.substring(from));
+            Number number = this.getNumber(countSql.toString(), params);
+            if(ObjectUtil.isNotEmpty(number)){
+                totalSize = number.intValue();
+            }
+            int pageSize = page.getPageSize();
+            // 开始页数
+            int pageNumber = page.getPageNumber();
+
+            // 总页数
+            int totalPage = PageUtil.totalPage(totalSize, pageSize);
+
+
+            // 批量查询数据
+            if(totalPage>0){
+                while (pageNumber<totalPage+1){
+                    StringBuilder pageSql = new StringBuilder(sql).append(order.toString()).append(" limit ").append(pageSize).append(" offset ").append(TdengineResultHelper.getStart(new Page(pageNumber,pageSize)));
+                    log.debug("开始第{}页批量查询所有数据(自带分页)，共{}页",pageNumber,totalPage);
+                    //查询该页数据
+                    List<T> list = this.list(pageSql.toString(), beanClass, params);
+                    if(CollUtil.isNotEmpty(list)){
+                        CollUtil.addAll(resList,list);
+                    }
+                    pageNumber ++;
+                }
+            }
+        } catch (Exception e) {
+            log.error(SQLNAME+" 批量查询所有数据(自带分页)异常", e);
+        }
+        return resList;
     }
 
     /**

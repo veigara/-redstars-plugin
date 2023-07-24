@@ -471,4 +471,35 @@ public abstract class TdengineSevice{
      * @since  2023/6/14 15:39
      */
     public abstract PageResult<Entity> page(String dbName,Page page, String sql, Object... params);
+
+    /**
+     *
+     * 批量查询所有数据(自带分页)
+     * @author zhuohx
+     * @param   page 分页参数
+     * @param   sql 不带分页的sql
+     * @param   params 查询参数
+     * @return java.util.List<T>
+     * @throws
+     * @version 1.0
+     * @since  2023/7/24 15:19
+     */
+    public <T> List<T> batchList(Page page, Class<T> beanClass, String sql, Object... params){
+        return this.batchList(null,page,beanClass,sql,params);
+    }
+
+    /**
+     *
+     * 批量查询所有数据(自带分页)
+     * @author zhuohx
+     * @param   dbName 数据源名称
+     * @param   page 分页参数
+     * @param   sql 不带分页的sql
+     * @param   params 查询参数
+     * @return java.util.List<T>
+     * @throws
+     * @version 1.0
+     * @since  2023/7/24 15:19
+     */
+    public abstract <T> List<T> batchList(String dbName,Page page, Class<T> beanClass, String sql, Object... params);
 }
