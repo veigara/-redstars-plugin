@@ -2,7 +2,8 @@
 
 #### 1.1、简介
 
-[redstars-tdengine](https://gitee.com/vfcm/redstars-plugin/tree/master/redstars-tdengine) 是一款时序数据库[tdengine](https://www.taosdata.com/)轻量级ORM 框架，只需简单配置，即可快速进行单表 CRUD 操作，从而节省大量时间。支持数据库连接池和多数据源，无需整合多数据源框架。使用静态调用的方式，执行CRUD方法，随时切换数据源，简洁代码，提升效率。
+[redstars-tdengine](https://gitee.com/vfcm/redstars-plugin/tree/master/redstars-tdengine) 是一款时序数据库[tdengine](https://www.taosdata.com/)轻量级ORM 框架，只需简单配置，即可快速进行单表 CRUD 操作，从而节省大量时间。支持数据库连接池和多数据源，无需整合多数据源框架。
+使用静态调用的方式，执行CRUD方法，随时切换数据源，简洁代码，提升效率。
 
 #### 1.2、快速开始
 
@@ -12,6 +13,7 @@
 - 熟悉 Spring Boot
 - 熟悉 Maven
 - 熟悉 tdengine相关概念和语法
+- tdengine数据库3.0.0以上
 
 ------
 
@@ -182,7 +184,7 @@ public class SampleTest {
 
 **提示**
 
-完整的代码示例请移步： [时序数据库测试案例](https://gitee.com/vfcm/redstars-plugin/tree/master/redstars-tdengine/tdengine-api/src/main/java/com/redstars/tdengine/example)
+完整的代码示例请移步： [时序数据库测试案例](https://gitee.com/vfcm/redstars-tdengine-demo)
 
 #### 1.3 安装
 
