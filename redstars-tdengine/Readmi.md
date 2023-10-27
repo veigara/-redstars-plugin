@@ -194,7 +194,7 @@ public class SampleTest {
  <dependency>
      <groupId>io.github.veigara</groupId>
      <artifactId>tdengine-spring-boot-starter</artifactId>
-     <version>1.1.0</version>
+     <version>1.2.2</version>
  </dependency>
 ```
 
