@@ -18,11 +18,6 @@ public class TdengineSqlVo {
     private String sql;
 
     /**
-     * sql语句(已填充值)
-     */
-    private String sqlAndValue;
-
-    /**
      * 字段值集合
      */
     private List<Object> columnValeList;
