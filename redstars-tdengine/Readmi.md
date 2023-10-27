@@ -61,7 +61,7 @@ INSERT INTO d25 USING meters tags(6,'California.Sunnyvale') VALUES (168724351619
 <dependency>
     <groupId>io.github.veigara</groupId>
     <artifactId>tdengine-spring-boot-starter</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
 </dependency>
 <!--druid连接池-->
 <dependency>
