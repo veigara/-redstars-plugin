@@ -398,11 +398,11 @@ TdengineDb db;
 // 使用默认数据源插入
 boolean save(Object entity);
 // 使用指定数据源插入  
-        boolean save(String dsName,Object entity);
+boolean save(String dsName,Object entity);
 // 使用默认数据源，根据sql插入
-        boolean insertOrUpdate(String sql, Object... params);
+boolean insertOrUpdate(String sql, Object... params);
 // 使用指定数据源，根据sql插入   
-        boolean insertOrUpdate(String dbName,String sql, Object... params);
+boolean insertOrUpdate(String dbName,String sql, Object... params);
 ```
 
 参数说明
@@ -413,6 +413,27 @@ boolean save(Object entity);
 | String | dsName | 数据源名称           |
 | String | sql    | 自定义sql语句        |
 | String | params | 自定义sql语句中的?对应的值 |
+
+**saveBatch**
+
+```java
+// 使用默认数据源插入(默认批量插入条数：1000条)
+boolean saveBatch(Collection<Object> entityList);
+// 使用指定数据源插入(默认批量插入条数：1000条)  
+boolean saveBatch(String dsName,Collection<Object> entityList);
+// 使用默认数据源指定批量插入条数插入
+boolean saveBatch(Collection<Object> entityList, int batchSize){
+// 使用指定数据源指定批量插入条数插入  
+boolean saveBatch(String dsName,Collection<Object> entityList, int batchSize);
+```
+
+参数说明
+
+| 类型     | 参数名    | 描述              |
+| ------ | ------ | --------------- |
+| Collection<Object> | entityList | 实体类对象集合           |
+| String | dsName | 数据源名称           |
+| int | batchSize    | 批量插入条数       |
 
 **Remove**
 

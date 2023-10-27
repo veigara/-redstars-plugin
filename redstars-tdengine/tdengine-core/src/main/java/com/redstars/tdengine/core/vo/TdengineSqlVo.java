@@ -13,9 +13,14 @@ import java.util.List;
 @AllArgsConstructor
 public class TdengineSqlVo {
     /**
-     * sql语句
+     * sql语句(未填充值)
      */
     private String sql;
+
+    /**
+     * sql语句(已填充值)
+     */
+    private String sqlAndValue;
 
     /**
      * 字段值集合

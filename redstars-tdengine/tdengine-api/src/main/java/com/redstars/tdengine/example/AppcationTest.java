@@ -7,9 +7,7 @@ import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.conditions.query.TdengineQueryWrapper;
 import com.redstars.tdengine.example.entity.MeterEntity;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author : zhouhx
@@ -30,6 +28,40 @@ public class AppcationTest {
         meterEntity.setLocation("California.Sunnyvale");
         boolean save = db.save(meterEntity);
         System.out.println("更新或者插入结果:"+save);
+    }
+
+    public static void bathchSave(){
+        MeterEntity meterEntity = new MeterEntity();
+        meterEntity.setTs(new Date());
+        meterEntity.setCurrent(11L);
+        meterEntity.setVoltage(116L);
+        meterEntity.setPhase(0.9);
+        meterEntity.setDbName("d25");
+        meterEntity.setGroupId(6);
+        meterEntity.setLocation("California.Sunnyvale");
+        MeterEntity meterEntity1 = new MeterEntity();
+        meterEntity1.setTs(new Date());
+        meterEntity1.setCurrent(12L);
+        meterEntity1.setVoltage(116L);
+        meterEntity1.setPhase(0.9);
+        meterEntity1.setDbName("d25");
+        meterEntity1.setGroupId(6);
+        meterEntity1.setLocation("California.Sunnyvale");
+        MeterEntity meterEntity2 = new MeterEntity();
+        meterEntity2.setTs(new Date());
+        meterEntity2.setCurrent(13L);
+        meterEntity2.setVoltage(117L);
+        meterEntity2.setPhase(0.9);
+        meterEntity2.setDbName("d26");
+        meterEntity2.setGroupId(6);
+        meterEntity2.setLocation("California.Sunnyvale");
+        ArrayList<Object> list = new ArrayList<>();
+        list.add(meterEntity);
+        list.add(meterEntity1);
+        list.add(meterEntity2);
+
+        boolean save = db.saveBatch(list,2);
+        System.out.println("批量插入结果:"+save);
     }
 
     public static void save1(){

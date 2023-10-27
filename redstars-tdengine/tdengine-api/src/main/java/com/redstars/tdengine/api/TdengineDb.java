@@ -10,7 +10,9 @@ import cn.hutool.db.Page;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.handler.BeanHandler;
 import cn.hutool.db.handler.RsHandler;
+import cn.hutool.db.sql.SqlBuilder;
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.redstars.tdengine.core.TdengineSevice;
 import com.redstars.tdengine.core.autoconfig.TdengineDataSource;
 import com.redstars.tdengine.core.common.PageResult;
@@ -26,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author : zhouhx
@@ -441,6 +444,64 @@ public class TdengineDb extends TdengineSevice {
             log.error(SQLNAME+" 批量查询所有数据(自带分页)异常", e);
         }
         return resList;
+    }
+
+    @Override
+    public boolean saveBatch(String dsName, Collection<Object> entityList, int batchSize) {
+        Assert.isFalse(batchSize < 1, "batchSize must not be less than one", new Object[0]);
+        if(CollUtil.isEmpty(entityList)){
+            return  false;
+        }
+        try {
+            ArrayList<Boolean> resList = new ArrayList();
+            int size = entityList.size();
+            int idxLimit = Math.min(batchSize, size);
+            StringBuilder sqlBuilder = new StringBuilder("INSERT INTO ");
+            Iterator<Object> iterator = entityList.iterator();
+            int i =1;
+            while (iterator.hasNext()){
+                Object entity = iterator.next();
+                TdengineSqlVo tdengineSqlVo = TdengineSqlHelper.entityTosql(entity);
+                String sqlVoSql = tdengineSqlVo.getSqlAndValue();
+                if( i < idxLimit){
+                    sqlBuilder.append(sqlVoSql.replace("INSERT INTO","")) ;
+                }else if(i == idxLimit){
+                    sqlBuilder.append(sqlVoSql.replace("INSERT INTO","")) ;
+                    boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString());
+                    resList.add(b);
+                    if(b){
+                        log.debug(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据成功", i,batchSize);
+                        idxLimit = Math.min(i+batchSize,size);
+                        sqlBuilder = new StringBuilder("INSERT INTO ");
+                    }else{
+                        log.info(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据失败", i,batchSize);
+                    }
+                }
+                i++;
+            }
+            // 循环完了后，看sqlBuilder是否还有没有插入的
+            if(sqlBuilder.length()> new StringBuilder("INSERT INTO ").length()){
+                boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString());
+                resList.add(b);
+                if(b){
+                    log.debug(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据成功", i,batchSize);
+                }else{
+                    log.info(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据失败,", i,batchSize);
+                }
+            }
+
+            // 判断结果集中全为true才成功，否则失败
+            List<Boolean> failList = resList.stream().filter(item -> item == false).collect(Collectors.toList());
+            if(CollUtil.isNotEmpty(failList)){
+                return false;
+            }
+            return true;
+
+        } catch (Exception e) {
+            log.error(SQLNAME+" 批量保存数据异常", e);
+        }
+
+        return false;
     }
 
     /**

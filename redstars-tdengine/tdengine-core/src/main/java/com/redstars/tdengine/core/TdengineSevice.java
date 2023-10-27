@@ -502,4 +502,63 @@ public abstract class TdengineSevice{
      * @since  2023/7/24 15:19
      */
     public abstract <T> List<T> batchList(String dbName,Page page, Class<T> beanClass, String sql, Object... params);
+
+    /**
+     *
+     * 批量保存数据
+     * @author zhuohx
+     * @param   entityList 集合数据
+     * @return boolean
+     * @throws
+     * @version 1.0
+     * @since  2023/10/26 15:19
+     */
+    public boolean saveBatch(Collection<Object> entityList) {
+        return this.saveBatch(null,entityList, 1000);
+    }
+
+    /**
+     *
+     * 根据数据源批量保存数据
+     * @author zhuohx
+     * @param   dsName 数据源名称
+     * @param   entityList 集合数据
+     * @return boolean
+     * @throws
+     * @version 1.0
+     * @since  2023/10/26 15:19
+     */
+    public boolean saveBatch(String dsName,Collection<Object> entityList) {
+        return this.saveBatch(dsName,entityList, 1000);
+    }
+
+    /**
+     *
+     * 批量保存数据
+     * <p> 时序数据库没有事务回滚，只保存正确插入多少条<p/>
+     * @author zhuohx
+     *  @param   entityList 集合数据
+     *  @param   batchSize 一次性批量插入次数
+     * @return boolean
+     * @throws
+     * @version 1.0
+     * @since  2023/10/26 15:25
+     */
+    public  boolean saveBatch(Collection<Object> entityList, int batchSize){
+        return this.saveBatch(null,entityList,batchSize);
+    }
+
+    /**
+     *
+     *
+     * @author zhuohx
+     * @param   dsName 数据源名称
+     * @param   entityList 集合数据
+     * @param   batchSize 一次性批量插入次数
+     * @return boolean
+     * @throws
+     * @version 1.0
+     * @since  2023/10/26 15:26
+     */
+    public abstract  boolean saveBatch(String dsName,Collection<Object> entityList, int batchSize);
 }

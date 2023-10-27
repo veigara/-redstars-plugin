@@ -33,7 +33,7 @@ public class TdengineSqlHelper {
         TdengineTableVerify.verifySave(obj.getClass());
 
         TdengineTableInfo tableInfo = TdengineTableHelper.getTableInfo(obj);
-        return new TdengineSqlVo(covertSaveSql(tableInfo),tableInfo.getColumnValueList()) ;
+        return new TdengineSqlVo(covertSaveSql(tableInfo),covertSaveSqlAndValue(tableInfo),tableInfo.getColumnValueList()) ;
     }
 
     /**
@@ -63,6 +63,27 @@ public class TdengineSqlHelper {
         return sqlBuilder.toString();
     }
 
+    /**
+     *
+     * 转换成插入sql语句(完整的sql,值已经填充)
+     * @author zhuohx
+     * @param
+     * @return java.lang.String
+     * @throws
+     * @version 1.0
+     * @since  2023/10/26 16:53
+     */
+    private  static String covertSaveSqlAndValue(TdengineTableInfo tableInfo){
+        String tableName = ObjectUtil.isNotEmpty(tableInfo.getSubTalbleName())?tableInfo.getSubTalbleName():tableInfo.getTalbleName()+"_"+tableInfo.getTableTagColumn().get(0);
+
+        StringBuilder sqlBuilder=new StringBuilder("INSERT INTO ");
+        sqlBuilder.append(tableName)
+                .append(" USING ").append(tableInfo.getTalbleName())
+                .append(" tags(").append(ArrayUtil.join(tableInfo.getTableTagColumnValue().toArray(),","))
+                .append(") VALUES(").append(ArrayUtil.join(tableInfo.getColumnValueList().toArray(),","))
+                .append(")");
+        return sqlBuilder.toString();
+    }
     /**
      *
      * wrappr 转换成sql语句
