@@ -459,20 +459,24 @@ public class TdengineDb extends TdengineSevice {
             StringBuilder sqlBuilder = new StringBuilder("INSERT INTO ");
             Iterator<E> iterator = entityList.iterator();
             int i =1;
+            List<Object> valueList = new ArrayList<>();
             while (iterator.hasNext()){
                 Object entity = iterator.next();
                 TdengineSqlVo tdengineSqlVo = TdengineSqlHelper.entityTosql(entity);
-                String sqlVoSql = tdengineSqlVo.getSqlAndValue();
+                String sqlVoSql = tdengineSqlVo.getSql();
+                List<Object> columnValeList = tdengineSqlVo.getColumnValeList();
+                valueList.addAll(columnValeList);
                 if( i < idxLimit){
                     sqlBuilder.append(sqlVoSql.replace("INSERT INTO","")) ;
                 }else if(i == idxLimit){
                     sqlBuilder.append(sqlVoSql.replace("INSERT INTO","")) ;
-                    boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString());
+                    boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString(),valueList.toArray());
                     resList.add(b);
                     if(b){
                         log.debug(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据成功", i,batchSize);
                         idxLimit = Math.min(i+batchSize,size);
                         sqlBuilder = new StringBuilder("INSERT INTO ");
+                        valueList = new ArrayList<>();
                     }else{
                         log.info(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据失败", i,batchSize);
                     }
@@ -481,7 +485,7 @@ public class TdengineDb extends TdengineSevice {
             }
             // 循环完了后，看sqlBuilder是否还有没有插入的
             if(sqlBuilder.length()> new StringBuilder("INSERT INTO ").length()){
-                boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString());
+                boolean b = this.insertOrUpdate(dsName, sqlBuilder.toString(),valueList.toArray());
                 resList.add(b);
                 if(b){
                     log.debug(SQLNAME+" 数据索引：{},批量数量：{}条,批量保存数据成功", i,batchSize);

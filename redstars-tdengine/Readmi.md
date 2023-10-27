@@ -61,7 +61,7 @@ INSERT INTO d25 USING meters tags(6,'California.Sunnyvale') VALUES (168724351619
 <dependency>
     <groupId>io.github.veigara</groupId>
     <artifactId>tdengine-spring-boot-starter</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
 </dependency>
 <!--druid连接池-->
 <dependency>
@@ -194,7 +194,7 @@ public class SampleTest {
  <dependency>
      <groupId>io.github.veigara</groupId>
      <artifactId>tdengine-spring-boot-starter</artifactId>
-     <version>1.2.3</version>
+     <version>1.2.4</version>
  </dependency>
 ```
 
@@ -600,7 +600,7 @@ Db use();
 | ------ | ------ | ----- |
 | 2023-6-24 | v1.0.0 | 基本增删改 |
 | 2023-9-11 | v1.2.1 | 增加批量查询所有数据(为缓解数据库压力，通过分页拉取数据) |
-| 2023-10-27 | v1.2.3 |增加批量插入 |
+| 2023-10-27 | v1.2.4 |增加批量插入 |
 
 
 ### 4、交流群
