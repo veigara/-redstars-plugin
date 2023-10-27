@@ -447,7 +447,7 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public boolean saveBatch(String dsName, Collection<Object> entityList, int batchSize) {
+    public <E> boolean saveBatch(String dsName, Collection<E> entityList, int batchSize) {
         Assert.isFalse(batchSize < 1, "batchSize must not be less than one", new Object[0]);
         if(CollUtil.isEmpty(entityList)){
             return  false;
@@ -457,7 +457,7 @@ public class TdengineDb extends TdengineSevice {
             int size = entityList.size();
             int idxLimit = Math.min(batchSize, size);
             StringBuilder sqlBuilder = new StringBuilder("INSERT INTO ");
-            Iterator<Object> iterator = entityList.iterator();
+            Iterator<E> iterator = entityList.iterator();
             int i =1;
             while (iterator.hasNext()){
                 Object entity = iterator.next();

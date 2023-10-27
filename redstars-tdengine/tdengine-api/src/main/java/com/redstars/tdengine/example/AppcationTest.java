@@ -55,7 +55,7 @@ public class AppcationTest {
         meterEntity2.setDbName("d26");
         meterEntity2.setGroupId(6);
         meterEntity2.setLocation("California.Sunnyvale");
-        ArrayList<Object> list = new ArrayList<>();
+        ArrayList<MeterEntity> list = new ArrayList<>();
         list.add(meterEntity);
         list.add(meterEntity1);
         list.add(meterEntity2);

@@ -513,7 +513,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/10/26 15:19
      */
-    public boolean saveBatch(Collection<Object> entityList) {
+    public <E> boolean saveBatch(Collection<E> entityList) {
         return this.saveBatch(null,entityList, 1000);
     }
 
@@ -528,7 +528,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/10/26 15:19
      */
-    public boolean saveBatch(String dsName,Collection<Object> entityList) {
+    public <E> boolean saveBatch(String dsName,Collection<E> entityList) {
         return this.saveBatch(dsName,entityList, 1000);
     }
 
@@ -544,7 +544,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/10/26 15:25
      */
-    public  boolean saveBatch(Collection<Object> entityList, int batchSize){
+    public <E> boolean saveBatch(Collection<E> entityList, int batchSize){
         return this.saveBatch(null,entityList,batchSize);
     }
 
@@ -560,5 +560,5 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/10/26 15:26
      */
-    public abstract  boolean saveBatch(String dsName,Collection<Object> entityList, int batchSize);
+    public abstract <E> boolean saveBatch(String dsName,Collection<E> entityList, int batchSize);
 }
