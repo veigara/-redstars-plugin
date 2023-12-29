@@ -69,6 +69,7 @@ INSERT INTO d25 USING meters tags(6,'California.Sunnyvale') VALUES (168724351619
     <artifactId>druid-spring-boot-starter</artifactId>
     <version>1.2.15</version>
 </dependency>  
+druid 连接池最高支持1.2.16,高版本已经删除某些类不在支持
 ```
 
 **配置**
