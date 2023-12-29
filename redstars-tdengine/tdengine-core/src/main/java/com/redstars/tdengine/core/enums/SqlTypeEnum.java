@@ -8,14 +8,19 @@ import lombok.Getter;
  */
 @Getter
 public enum SqlTypeEnum {
+    SAVE(1,"INSERT INTO %s USING %s  tags(%s) VALUES(%s)"),
     /**
      * select 查询语句
      */
-    SELECT(1,"select 查询语句"),
+    SELECT(2,"select %s from %s %s"),
     /**
      * delete 删除语句
      */
-    DELETE(2,"delete 删除语句");
+    DELETE(3,"delete from %s %s"),
+    /**
+     * count 语句
+     */
+    COUNT(4,"select count(*) from %s %s");
 
     /**
      * 类型

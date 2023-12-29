@@ -288,34 +288,6 @@ hikari: # hikari 【连接池】相关的全局配置
   readOnly: false
 ```
 
-Tomcat JDBC Pool连接池(tomcat)
-
-```yaml
-      tomcat:
-        # (boolean) 连接池创建的连接的默认的auto-commit 状态
-        defaultAutoCommit: true
-        # (boolean) 连接池创建的连接的默认的read-only 状态。 如果没有设置则setReadOnly 方法将不会被调用。 ( 某些驱动不支持只读模式， 比如：Informix)
-        defaultReadOnly: false
-        # (int) 初始化连接： 连接池启动时创建的初始化连接数量，1。2 版本后支持
-        initialSize: 10
-        # (int) 最大活动连接： 连接池在同一时间能够分配的最大活动连接的数量， 如果设置为非正数则表示不限制
-        maxActive: 100
-        # (int) 最大空闲连接： 连接池中容许保持空闲状态的最大连接数量， 超过的空闲连接将被释放， 如果设置为负数表示不限制 如果启用，将定期检查限制连接，如果空闲时间超过minEvictableIdleTimeMillis 则释放连接 （ 参考testWhileIdle ）
-        maxIdle: 8
-        # (int) 最小空闲连接： 连接池中容许保持空闲状态的最小连接数量， 低于这个数量将创建新的连接， 如果设置为0 则不创建 如果连接验证失败将缩小这个值（ 参考testWhileIdle ）
-        minIdle: 0
-        # (int) 最大等待时间： 当没有可用连接时， 连接池等待连接被归还的最大时间( 以毫秒计数)， 超过时间则抛出异常， 如果设置为-1 表示无限等待
-        maxWait: 30000
-        # (String) SQL 查询， 用来验证从连接池取出的连接， 在将连接返回给调用者之前。 如果指定， 则查询必须是一个SQL SELECT 并且必须返回至少一行记录 查询不必返回记录，但这样将不能抛出SQL异常
-        validationQuery: SELECT 1
-        # (boolean) 指明是否在从池中取出连接前进行检验， 如果检验失败， 则从池中去除连接并尝试取出另一个。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串 参考validationInterval以获得更有效的验证
-        testOnBorrow: false
-        # (boolean) 指明是否在归还到池中前进行检验 注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
-        testOnReturn: false
-        # (boolean) 指明连接是否被空闲连接回收器( 如果有) 进行检验。 如果检测失败， 则连接将被从池中去除。注意： 设置为true 后如果要生效，validationQuery 参数必须设置为非空字符串
-        testWhileIdle: false
-```
-
 DBCP连接池(dbcp)
 
 ```yaml
@@ -377,7 +349,22 @@ Druid连接池(druid)
         # 类型是List<com.alibaba.druid.filter.Filter>， 如果同时配置了filters和proxyFilters， 是组合关系，并非替换关系
         proxyFilters:
 ```
+Beecp连接池
 
+```yaml
+      beecp:
+        # 是否启用公平锁
+        fairMode: false
+        # 初始连接池数量
+        initialSize: 0
+        # 最大连接池数量
+        maxActive: 10
+        # max permit size of pool semaphore	
+        borrowSemaphoreSize: 5
+        # 是否自动提交
+        defaultAutoCommit: true
+
+```
 注意：druid-spring-boot-starter 连接池最高支持1.2.15
 
 #### 2.3、CRUD 接口
@@ -462,10 +449,6 @@ T getOne(TdengineQueryWrapper<T> queryWrapper);
         T getOne(String sql, Class<T> beanClass, Object... params);
 // 使用指定数据源,根据sql，查询一条记录,并转换成目标对象
         T getOne(String dbName,String sql, Class<T> beanClass, Object... params);
-// 使用默认数据源,根据sql，查询一条记录,并转换成Entity对象
-        Entity getOne(String sql, Object... params);
-// 使用指定数据源,根据sql，查询一条记录,并转换成Entity对象
-        Entity getOne(String dbName, String sql, Object... params);
 // 使用默认数据源,根据queryWrapper，查询一条记录,并转换成Map对象
         Map<String, Object> getMap(TdengineQueryWrapper<?> queryWrapper);
 // 使用指定数据源,根据queryWrapper，查询一条记录,并转换成Map对象
@@ -509,18 +492,18 @@ List<T> list(TdengineQueryWrapper<T> queryWrapper);
         List<T> list(String sql, Class<T> beanClass, Object... params)
 // 使用指定数据源,根据sql，查询全部记录,并转换成目标对象
         List<T> list(String dbName,String sql, Class<T> beanClass, Object... params);
-// 使用默认数据源,根据sql，查询全部记录,并转换成Entity对象
-        List<Entity> list(String sql, Object... params);
-// 使用指定数据源,根据sql，查询全部记录,并转换成Entity对象
-        List<Entity> list(String dbName,String sql, Object... params);
-// 使用默认数据源,根据sql，查询全部记录,并转换成Entity对象
-        List<Entity> list(String sql, Map<String, Object> params);
-// 使用指定数据源,根据sql，查询全部记录,并转换成Entity对象
-        List<Entity> list(String dbName,String sql, Map<String, Object> params);
+// 使用默认数据源,根据sql，查询全部记录,并转换成Map对象
+        List<Map<String, Object>> list(String sql, Object... params);
+// 使用指定数据源,根据sql，查询全部记录,并转换成Map对象
+        List<Map<String, Object>> list(String dbName,String sql, Object... params);
+// 使用默认数据源,根据sql，查询全部记录,并转换成Map对象
+        List<Map<String, Object>> list(String sql, Map<String, Object> params);
+// 使用指定数据源,根据sql，查询全部记录,并转换成Map对象
+        List<Map<String, Object>> list(String dbName,String sql, Map<String, Object> params);
 // 使用默认数据源,根据queryWrapper条件，查询全部记录,并转换成Entity对象
-        List<Entity> listMaps(TdengineQueryWrapper<?> queryWrapper);
+        List<Map<String, Object>> listMaps(TdengineQueryWrapper<?> queryWrapper);
 // 使用指定数据源,根据queryWrapper条件，查询全部记录,并转换成Entity对象
-        List<Entity> listMaps(String dsName,TdengineQueryWrapper<?> queryWrapper);
+        List<Map<String, Object>> listMaps(String dsName,TdengineQueryWrapper<?> queryWrapper);
 ```
 
 参数说明
@@ -545,10 +528,10 @@ PageResult<T> page(Page page, TdengineQueryWrapper<T> queryWrapper);
         PageResult<T> page(Page page, Class<T> beanClass, String sql, Object... params);
 // 使用指定数据源,根据sql，分页查询,并转换成目标对象
         PageResult<T> page(String dbName,Page page, Class<T> beanClass, String sql, Object... params);
-// 使用默认数据源,根据sql，分页查询,并转换成Entity对象
-        PageResult<Entity> page(Page page, String sql, Object... params);
-// 使用指定数据源,根据sql，分页查询,并转换成Entity对象
-        PageResult<Entity> page(String dbName,Page page, String sql, Object... params);
+// 使用默认数据源,根据sql，分页查询,并转换成Map<String, Object>对象
+        PageResult<Map<String, Object>> page(Page page, String sql, Object... params);
+// 使用指定数据源,根据sql，分页查询,并转换成Map<String, Object>对象
+        PageResult<Map<String, Object>> page(String dbName,Page page, String sql, Object... params);
 
 ```
 
@@ -580,13 +563,13 @@ long count(TdengineQueryWrapper<?> queryWrapper);
 
 **Db类**
 
-使用静态调用的方式，获取数据源对象Db
+使用静态调用的方式，获取数据源对象DataSource
 
 ```java
 // 获取默认数据源对象
-Db use();
+DataSource use();
 // 获取指定数据源对象
-        Db use(String dsName)
+DataSource use(String dsName)
 ```
 
 参数说明
@@ -596,12 +579,12 @@ Db use();
 | String | dsName | 数据源名称 |
 
 ### 3、发布历史
-|  日期    | 版本    | 更新内容    |
-| ------ | ------ | ----- |
-| 2023-6-24 | v1.0.0 | 基本增删改 |
-| 2023-9-11 | v1.2.1 | 增加批量查询所有数据(为缓解数据库压力，通过分页拉取数据) |
+| 日期         | 版本     | 更新内容 |
+|------------|--------|  |
+| 2023-6-24  | v1.0.0 | 基本增删改 |
+| 2023-9-11  | v1.2.1 | 增加批量查询所有数据(为缓解数据库压力，通过分页拉取数据) |
 | 2023-10-27 | v1.2.4 |增加批量插入 |
-
+| 2023-12-29 | v1.3.0 |移除hutool连接池依赖改为jdbctemplate,移除mybatisPlus依赖 |
 
 ### 4、交流群
 

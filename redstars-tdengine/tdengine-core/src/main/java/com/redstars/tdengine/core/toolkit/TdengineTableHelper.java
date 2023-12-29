@@ -15,24 +15,32 @@ import java.util.*;
  * @date : 2023/6/12 15:45
  */
 public class TdengineTableHelper {
+    /**
+     * 缓存表信息 key为包名+类名
+     */
+    public static HashMap<String, TdengineTableInfo> tableInfCache = new HashMap<>(8);
 
     /**
      *
      * 转为数据对象
      * @author zhuohx
-     * @param   object 实体类数据
+     * @param   obj 实体类数据
      * @return com.redstars.tdengine.core.entity.TdengineTableInfo
      * @throws
      * @version 1.0
      * @since  2023/6/12 16:28
      */
-    public static TdengineTableInfo getTableInfo(Object object) throws IllegalAccessException {
+    public static TdengineTableInfo getTableInfo(Class<?> classObj,Object obj) throws IllegalAccessException {
+        TdengineTableInfo tdengineTableInfo = tableInfCache.get(classObj.getName());
+        if(ObjectUtil.isNotEmpty(tdengineTableInfo)){
+            return tdengineTableInfo;
+        }
         TdengineTableInfo tableInfo = new TdengineTableInfo();
 
-        Field[] fields = object.getClass().getDeclaredFields();
+        Field[] fields = classObj.getDeclaredFields();
 
         // 获取表名
-        TdengineTableName table = object.getClass().getAnnotation(TdengineTableName.class);
+        TdengineTableName table = classObj.getAnnotation(TdengineTableName.class);
         if (table != null) {
             String tableName = table.value();
             tableInfo.setTalbleName(tableName);
@@ -49,24 +57,31 @@ public class TdengineTableHelper {
             // 子表名
             boolean isSubTableNameField = field.isAnnotationPresent(TdengineSubTableName.class);
             boolean isTableNameIdField = field.isAnnotationPresent(TdengineTableId.class);
-            Object value = field.get(object);
             if(isTagField){
                 tagColumn.add(StrUtil.toUnderlineCase(field.getName()));
-                if(value instanceof String){
-                    tagColumnValue.add(String.format("'%s'",value));
+            }else if(isTableNameIdField){
+                column.add(StrUtil.toUnderlineCase(field.getName()));
+            }else if(!isSubTableNameField){
+                column.add(StrUtil.toUnderlineCase(field.getName()));
+            }
+
+            if(ObjectUtil.isNotEmpty(obj)){
+                Object value = field.get(obj);
+                if(isTagField){
+                    if(value instanceof String){
+                        tagColumnValue.add(String.format("'%s'",value));
+                    }else{
+                        tagColumnValue.add(value);
+                    }
+                }else if(isSubTableNameField && ObjectUtil.isNotEmpty(value)){
+                    tableInfo.setSubTalbleName(value.toString());
                 }else{
-                    tagColumnValue.add(value);
-                }
-            }else if(isSubTableNameField && ObjectUtil.isNotEmpty(value)){
-                tableInfo.setSubTalbleName(value.toString());
-            }else{
-                if(isTableNameIdField && value instanceof Date){
-                    // date 类型的时间戳主键自动转为long类型
-                    column.add(StrUtil.toUnderlineCase(field.getName()));
-                    columnValue.add(((Date) value).getTime());
-                }else{
-                    column.add(StrUtil.toUnderlineCase(field.getName()));
-                    columnValue.add(value);
+                    if(isTableNameIdField && value instanceof Date){
+                        // date 类型的时间戳主键自动转为long类型
+                        columnValue.add(((Date) value).getTime());
+                    }else{
+                        columnValue.add(value);
+                    }
                 }
             }
         }
@@ -74,6 +89,9 @@ public class TdengineTableHelper {
         tableInfo.setTableTagColumnValue(tagColumnValue);
         tableInfo.setColumnList(column);
         tableInfo.setColumnValueList(columnValue);
+
+        tableInfCache.put(classObj.getName(),tableInfo);
+
         return tableInfo;
     }
 
@@ -97,4 +115,5 @@ public class TdengineTableHelper {
         }
         return null;
     }
+
 }

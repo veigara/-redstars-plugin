@@ -18,17 +18,17 @@ public class MeterEntity {
     @TdengineTableId
     private Date ts;
 
-    private Long current;
+    private Float current;
 
     private Long voltage;
 
-    private Double phase;
+    private Float phase;
 
     @TdengineSubTableName
     private String dbName;
 
     @TdengineTableTag
-    private Integer groupId;
+    private Integer groupid;
 
     @TdengineTableTag
     private String location;

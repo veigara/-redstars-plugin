@@ -1,6 +1,6 @@
 package com.redstars.tdengine.core.autoconfig;
 
-import cn.hutool.db.ds.DSFactory;
+import javax.sql.DataSource;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class TdengineDataSource {
     /**
      * 存放所有的数据源
      */
-    private static Map<String, DSFactory> datasourceMap = new LinkedHashMap();
+    private static Map<String, DataSource> datasourceMap = new LinkedHashMap();
     /**
      * 主数据源名称
      */
@@ -24,14 +24,14 @@ public class TdengineDataSource {
      *
      * @author zhuohx
      * @param  dsName 数据源名称
-     * @param  dsFactory 数据源工厂
+     * @param  dataSource 数据源
      * @return void
      * @throws
-     * @version 1.0
-     * @since  2023/6/9 16:50
+     * @version 2.0
+     * @since  2023/12/23 11:25
      */
-    public static void addDataSource(String dsName,DSFactory dsFactory){
-        datasourceMap.put(dsName,dsFactory);
+    public static void addDataSource(String dsName, DataSource dataSource){
+        datasourceMap.put(dsName,dataSource);
     }
 
     public static  void addPrimaryDsName(String dsName){
@@ -50,12 +50,12 @@ public class TdengineDataSource {
      * 获取数据源
      * @author zhuohx
      * @param  dsName 数据源名称
-     * @return cn.hutool.db.ds.DSFactory
+     * @return javax.sql.DataSource
      * @throws
-     * @version 1.0
-     * @since  2023/6/9 16:52
+     * @version 2.0
+     * @since   2023/12/23 11:25
      */
-    public static  DSFactory getDataSource(String dsName){
+    public static  DataSource getDataSource(String dsName){
         return datasourceMap.get(dsName);
     }
 
@@ -64,12 +64,12 @@ public class TdengineDataSource {
      * 获取主数据源
      * @author zhuohx
      * @param
-     * @return cn.hutool.db.ds.DSFactory
+     * @return javax.sql.DataSource
      * @throws
-     * @version 1.0
-     * @since  2023/6/9 16:55
+     * @version 2.0
+     * @since  2023/12/23 11:25
      */
-    public static  DSFactory getPrimaryDataSource(){
+    public static  DataSource getPrimaryDataSource(){
         return datasourceMap.get(primaryDsName);
     }
 }

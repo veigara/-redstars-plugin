@@ -1,10 +1,10 @@
 package com.redstars.tdengine.core;
 
-import cn.hutool.db.Db;
-import cn.hutool.db.Entity;
+
 import cn.hutool.db.Page;
 import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.conditions.query.TdengineQueryWrapper;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +26,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:23
      */
-    public abstract Db use() throws SQLException;
+    public abstract DataSource use() throws SQLException;
 
     /**
      *
@@ -38,9 +38,9 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:23
      */
-    public abstract Db use(String dsName) throws SQLException;
+    public abstract DataSource use(String dsName) throws SQLException;
 
-    public boolean insertOrUpdate(String sql, Object... params) {
+    public boolean insertOrUpdate(String sql, Object... params)  {
         return this.insertOrUpdate(null,sql,params);
     }
 
@@ -79,7 +79,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:15
      */
-    public abstract  boolean save(String dsName,Object entity);
+    public abstract  boolean save(String dsName,Object entity) ;
 
     /**
      *
@@ -106,7 +106,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:23
      */
-    public abstract boolean remove(String dsName, TdengineQueryWrapper<?> queryWrapper);
+    public abstract boolean remove(String dsName, TdengineQueryWrapper<?> queryWrapper) ;
 
     /**
      *
@@ -133,7 +133,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:25
      */
-    public abstract <T> T getOne(String dsName,TdengineQueryWrapper<T> queryWrapper);
+    public abstract <T> T getOne(String dsName,TdengineQueryWrapper<T> queryWrapper) ;
 
     /**
      *
@@ -166,11 +166,11 @@ public abstract class TdengineSevice{
      */
     public abstract <T> T getOne(String dbName,String sql, Class<T> beanClass, Object... params);
 
-    public Entity getOne(String sql, Object... params) {
+    public Map<String,Object> getOne(String sql, Object... params) {
         return this.getOne(null,sql,params);
     }
 
-    public abstract Entity getOne(String dbName, String sql, Object... params);
+    public abstract Map<String,Object> getOne(String dbName, String sql, Object... params);
 
 
     /**
@@ -225,7 +225,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:27
      */
-    public abstract long count(String dsName,TdengineQueryWrapper<?> queryWrapper);
+    public abstract long count(String dsName,TdengineQueryWrapper<?> queryWrapper) ;
 
     public Number getNumber(String sql, Object... params) {
         return this.getNumber(null,sql,params);
@@ -260,9 +260,9 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:08
      */
-    public abstract Number getNumber(String dsName,TdengineQueryWrapper<?> queryWrapper);
+    public abstract Number getNumber(String dsName,TdengineQueryWrapper<?> queryWrapper) ;
 
-    public String getString(String sql, Object... params) throws SQLException {
+    public String getString(String sql, Object... params) {
         return this.getString(null,sql,params);
     }
 
@@ -295,7 +295,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:18
      */
-    public abstract String getString(String dbName,TdengineQueryWrapper<?> queryWrapper);
+    public abstract String getString(String dbName,TdengineQueryWrapper<?> queryWrapper) ;
 
     /**
      *
@@ -321,11 +321,11 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:45
      */
-    public  List<Entity> listMaps(TdengineQueryWrapper<?> queryWrapper){
+    public  List<Map<String, Object>> listMaps(TdengineQueryWrapper<?> queryWrapper){
         return this.listMaps(null,queryWrapper);
     }
 
-    public List<Entity> list(String sql, Object... params) {
+    public List<Map<String, Object>> list(String sql, Object... params) {
         return this.list(null,sql,params);
     }
 
@@ -333,7 +333,7 @@ public abstract class TdengineSevice{
         return this.list(null,sql,beanClass,params);
     }
 
-    public List<Entity> list(String sql, Map<String, Object> params) {
+    public List<Map<String, Object>> list(String sql, Map<String, Object> params) {
         return this.list(null,sql,params);
     }
 
@@ -348,7 +348,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:43
      */
-    public abstract <T> List<T> list(String dsName,TdengineQueryWrapper<T> queryWrapper);
+    public abstract <T> List<T> list(String dsName,TdengineQueryWrapper<T> queryWrapper) ;
 
     /**
      *
@@ -373,26 +373,12 @@ public abstract class TdengineSevice{
      * @param   dbName 数据源名称
      * @param   sql sql语句
      * @param   params 查询参数
-     * @return java.util.List<cn.hutool.db.Entity>
-     * @throws
-     * @version 1.0
-     * @since  2023/6/14 15:32
-     */
-    public abstract List<Entity> list(String dbName,String sql, Map<String, Object> params);
-
-    /**
-     *
-     * 查询集合
-     * @author zhuohx
-     * @param   dbName 数据源名称
-     * @param   sql sql语句
-     * @param   params 查询参数
-     * @return java.util.List<cn.hutool.db.Entity>
+     * @return java.util.List<java.util.Map>
      * @throws
      * @version 1.0
      * @since  2023/6/14 15:34
      */
-    public abstract List<Entity> list(String dbName,String sql, Object... params);
+    public abstract List<Map<String, Object>> list(String dbName,String sql, Object... params);
 
     /**
      *
@@ -405,7 +391,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:45
      */
-    public abstract List<Entity> listMaps(String dsName,TdengineQueryWrapper<?> queryWrapper);
+    public abstract List<Map<String, Object>> listMaps(String dsName,TdengineQueryWrapper<?> queryWrapper) ;
 
     /**
      *
@@ -425,7 +411,7 @@ public abstract class TdengineSevice{
         return  this.page(null,page,beanClass,sql,params);
     }
 
-    public PageResult<Entity> page(Page page, String sql, Object... params) {
+    public PageResult<Map<String, Object>> page(Page page, String sql, Object... params) {
         return this.page(null,page,sql,params);
     }
 
@@ -439,7 +425,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/12 10:48
      */
-    public abstract <T> PageResult<T> page(String dsName,Page page, TdengineQueryWrapper<T> queryWrapper);
+    public abstract <T> PageResult<T> page(String dsName,Page page, TdengineQueryWrapper<T> queryWrapper) ;
 
     /**
      *
@@ -470,7 +456,7 @@ public abstract class TdengineSevice{
      * @version 1.0
      * @since  2023/6/14 15:39
      */
-    public abstract PageResult<Entity> page(String dbName,Page page, String sql, Object... params);
+    public abstract PageResult<Map<String, Object>> page(String dbName,Page page, String sql, Object... params);
 
     /**
      *

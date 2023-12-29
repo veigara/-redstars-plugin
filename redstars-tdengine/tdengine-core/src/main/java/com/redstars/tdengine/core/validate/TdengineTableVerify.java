@@ -1,17 +1,12 @@
 package com.redstars.tdengine.core.validate;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.redstars.tdengine.core.annotation.TdengineTableId;
 import com.redstars.tdengine.core.annotation.TdengineTableName;
 import com.redstars.tdengine.core.annotation.TdengineTableTag;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

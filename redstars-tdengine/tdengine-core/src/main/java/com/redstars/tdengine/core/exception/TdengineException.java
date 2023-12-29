@@ -19,4 +19,8 @@ public class TdengineException extends RuntimeException {
         super(msg, e);
         this.msg = msg;
     }
+    public TdengineException(Throwable e) {
+        super(e);
+        this.msg = e.getMessage();
+    }
 }

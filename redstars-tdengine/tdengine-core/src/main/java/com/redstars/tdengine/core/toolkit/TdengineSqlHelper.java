@@ -11,6 +11,7 @@ import com.redstars.tdengine.core.validate.TdengineTableVerify;
 import com.redstars.tdengine.core.vo.TdengineSqlVo;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author : zhouhx
@@ -32,7 +33,7 @@ public class TdengineSqlHelper {
         // 验证
         TdengineTableVerify.verifySave(obj.getClass());
 
-        TdengineTableInfo tableInfo = TdengineTableHelper.getTableInfo(obj);
+        TdengineTableInfo tableInfo = TdengineTableHelper.getTableInfo(obj.getClass(),obj);
         return new TdengineSqlVo(covertSaveSql(tableInfo),tableInfo.getColumnValueList()) ;
     }
 
@@ -54,13 +55,7 @@ public class TdengineSqlHelper {
         }
         String tableName = ObjectUtil.isNotEmpty(tableInfo.getSubTalbleName())?tableInfo.getSubTalbleName():tableInfo.getTalbleName()+"_"+tableInfo.getTableTagColumn().get(0);
 
-        StringBuilder sqlBuilder=new StringBuilder("INSERT INTO ");
-        sqlBuilder.append(tableName)
-        .append(" USING ").append(tableInfo.getTalbleName())
-        .append(" tags(").append(ArrayUtil.join(tableInfo.getTableTagColumnValue().toArray(),","))
-        .append(") VALUES(").append(ArrayUtil.join(fields,","))
-        .append(")");
-        return sqlBuilder.toString();
+        return String.format(SqlTypeEnum.SAVE.getText(), tableName,tableInfo.getTalbleName(),ArrayUtil.join(tableInfo.getTableTagColumnValue().toArray(),","),ArrayUtil.join(fields,","));
     }
 
     /**
@@ -75,41 +70,39 @@ public class TdengineSqlHelper {
      * @since  2023/6/13 9:22
      */
     public static String wrapperToSql(SqlTypeEnum sqlTypeEnum, TdengineQueryWrapper wrapper) throws IllegalAccessException {
-
-        String talbleName = TdengineTableHelper.getTableName(wrapper.getEntityClass());
+        TdengineTableInfo tableInfo = TdengineTableHelper.getTableInfo(wrapper.getEntityClass(),null);
+        if(ObjectUtil.isEmpty(tableInfo)){
+            throw new TdengineException(wrapper.getEntityClass()+" parsing exceptions");
+        }
+        String talbleName = tableInfo.getTalbleName();
         if(ObjectUtil.isEmpty(talbleName)){
             throw new TdengineException(wrapper.getEntityClass()+" must exist @tdengineTableName annotation");
         }
-        // 子表后缀
-        String subTableSuffix = wrapper.getSubTableSuffix();
+        List<String> columnList = tableInfo.getColumnList();
+        List<String> tableTagColumn = tableInfo.getTableTagColumn();
+
+        String subTableSuffix = null;
         if(ObjectUtil.isNotEmpty(subTableSuffix)){
             talbleName = talbleName+"_"+subTableSuffix;
         }
         String sqlSelect = wrapper.getSqlSelect();
-        String sqlSegment = wrapper.getCustomSqlSegment();
+        String sqlSegment = wrapper.getSqlSegment();
         if(ObjectUtil.isEmpty(sqlSelect)){
-            sqlSelect = " * ";
+            columnList.addAll(tableTagColumn);
+            sqlSelect = columnList.stream().collect(Collectors.joining(","));
         }
-        StringBuilder sqlBuilder = null;
+
         if(sqlTypeEnum.equals(SqlTypeEnum.SELECT)){
-            sqlBuilder = new StringBuilder("select ");
-            sqlBuilder.append(sqlSelect);
-        }else{
-            sqlBuilder = new StringBuilder("delete ");
+            return String.format(SqlTypeEnum.SELECT.getText(), sqlSelect, talbleName, sqlSegment);
         }
-        sqlBuilder.append(" from ").append(talbleName).append(" ");
-        if(ObjectUtil.isNotEmpty(sqlSegment)){
-            sqlBuilder.append(sqlSegment);
-            Map<String,Object> valuePairs = wrapper.getParamNameValuePairs();
-            String sql = sqlBuilder.toString();
-            for (String key:valuePairs.keySet()) {
-                sql = sql.replace(String.format("#{ew.paramNameValuePairs.%s}",key),valuePairs.get(key).toString());
-
-            }
-            return sql;
+        if(sqlTypeEnum.equals(SqlTypeEnum.DELETE)){
+            return String.format(SqlTypeEnum.DELETE.getText(), talbleName, sqlSegment);
+        }
+        if(sqlTypeEnum.equals(SqlTypeEnum.COUNT)){
+            return String.format(SqlTypeEnum.COUNT.getText(), talbleName, sqlSegment);
         }
 
-        return sqlBuilder.toString();
+        return null;
     }
 
     /**

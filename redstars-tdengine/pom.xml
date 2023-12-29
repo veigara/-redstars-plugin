@@ -7,7 +7,7 @@
         <groupId>io.github.veigara</groupId>
         <version>1.0.0</version>
     </parent>
-    <version>1.2.4</version>
+    <version>1.3.0</version>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>redstars-tdengine</artifactId>
@@ -20,7 +20,35 @@
 
     <packaging>pom</packaging>
 
-    <dependencies>
-    </dependencies>
+    <properties>
+        <tdversion>1.3.0</tdversion>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.veigara</groupId>
+                <artifactId>redstars-tdengine</artifactId>
+                <version>${tdversion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.veigara</groupId>
+                <artifactId>tdengine-api</artifactId>
+                <version>${tdversion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.veigara</groupId>
+                <artifactId>tdengine-core</artifactId>
+                <version>${tdversion}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.veigara</groupId>
+                <artifactId>tdengine-spring-boot-starter</artifactId>
+                <version>${tdversion}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

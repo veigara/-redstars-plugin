@@ -1,31 +1,28 @@
 package com.redstars.tdengine.api;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
-import cn.hutool.db.Db;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
-import cn.hutool.db.ds.DSFactory;
-import cn.hutool.db.handler.BeanHandler;
-import cn.hutool.db.handler.RsHandler;
-import cn.hutool.db.sql.SqlBuilder;
 import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.redstars.tdengine.core.TdengineSevice;
 import com.redstars.tdengine.core.autoconfig.TdengineDataSource;
 import com.redstars.tdengine.core.common.PageResult;
 import com.redstars.tdengine.core.conditions.query.TdengineQueryWrapper;
 import com.redstars.tdengine.core.enums.SqlTypeEnum;
+import com.redstars.tdengine.core.exception.TdengineException;
 import com.redstars.tdengine.core.toolkit.TdengineResultHelper;
 import com.redstars.tdengine.core.toolkit.TdengineSqlHelper;
 import com.redstars.tdengine.core.vo.TdengineSqlVo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,7 +44,7 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public Db use() throws SQLException {
+    public DataSource use() throws SQLException {
         /**
          * 默认数据源
          */
@@ -59,37 +56,66 @@ public class TdengineDb extends TdengineSevice {
 
         log.debug("当前激活的时序数据源："+defaltDbName);
 
-        DSFactory dsFactory = TdengineDataSource.getPrimaryDataSource();
-        DataSource dataSource = dsFactory.getDataSource();
-        dsFactory.getDataSource();
-        return Db.use(dataSource);
+        DataSource dataSource = TdengineDataSource.getPrimaryDataSource();
+        return dataSource;
     }
 
     @Override
-    public  Db use(String dsName) throws SQLException {
+    public  DataSource use(String dsName) throws SQLException {
         if(ObjectUtil.isEmpty(dsName)){
             return use();
         }
-        DSFactory dsFactory = TdengineDataSource.getDataSource(dsName);
-        DataSource dataSource = dsFactory.getDataSource();
+        DataSource dataSource = TdengineDataSource.getDataSource(dsName);
         if(ObjectUtil.isEmpty(dataSource)){
             throw new SQLException(String.format("数据源:%s不存在",dsName));
         }
         log.debug("当前激活的时序数据源："+dsName);
-        return Db.use(dataSource);
+        return dataSource;
     }
 
     @Override
-    public Entity getOne(String dbName, String sql, Object... params) {
+    public Map<String,Object> getOne(String dbName, String sql, Object... params) throws RuntimeException {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            return db.queryOne(sql, params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            Map<String, Object> res = template.queryForMap(sql, params);
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
+
+            return res;
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
+            handleException(e);
         }
         return null;
+    }
+    /**
+     *
+     * 打印sql参数
+     * @author zhuohx
+     * @return void
+     * @throws
+     * @version 1.0
+     * @since  2023/12/28 10:56
+     */
+    private static void printSql(String sql, Object[] params) {
+        log.debug(String.format("%s  ==>  Preparing:%s", SQLNAME, sql));
+        if(ObjectUtil.isNotEmpty(params)){
+            log.debug(String.format("%s  ==> Parameters:%s", SQLNAME,JSONObject.toJSONString(params)));
+        }
+    }
+
+    /**
+     *
+     * 处理异常
+     * @author zhuohx
+     * @param
+     * @return void
+     * @throws
+     * @version 1.0
+     * @since  2023/12/27 16:00
+     */
+    private static void handleException(SQLException e) {
+        log.error(ERRFILENAME, e);
+        log.error("ERROR Code: " + e.getErrorCode());
     }
 
     /**
@@ -104,13 +130,14 @@ public class TdengineDb extends TdengineSevice {
     @Override
     public <T> T getOne(String dbName, String sql, Class<T> beanClass, Object... params) {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            T res = (T) db.query(sql, (RsHandler) (new BeanHandler(beanClass)), params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            T res = (T) template.queryForObject(sql,params,new BeanPropertyRowMapper<T>(beanClass));
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
+
             return TdengineResultHelper.covertObj(res, beanClass);
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
+            handleException(e);
         }
         return null;
     }
@@ -118,24 +145,29 @@ public class TdengineDb extends TdengineSevice {
     @Override
     public Number getNumber(String dbName, String sql, Object... params) {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            return db.queryNumber(sql, params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            Number res = (Number) template.queryForObject(sql,params,Number.class);
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
+
+            return res;
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
+            handleException(e);
         }
         return null;
     }
 
     @Override
-    public String getString(String dbName, String sql, Object... params){
+    public String getString(String dbName, String sql, Object... params)  {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            return db.queryString(sql, params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            String res = (String) template.queryForObject(sql,params,String.class);
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
+
+            return res;
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
+            handleException(e);
         }
         return null;
     }
@@ -149,40 +181,15 @@ public class TdengineDb extends TdengineSevice {
      * @date 2023/3/3 14:50
      */
     @Override
-    public boolean insertOrUpdate(String dbName, String sql, Object... params) {
+    public boolean insertOrUpdate(String dbName, String sql, Object... params)  {
         int updateCount = 0;
-        Connection conn = null;
-        PreparedStatement pstmt = null;
         try {
-            Db db = use(dbName);
-            conn = db.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            int length = params.length;
-            if (length > 0) {
-                for (int i = 0; i < length; i++) {
-                    pstmt.setObject(i + 1, params[i]);
-                }
-            }
-            // execute
-            pstmt.execute();
-            updateCount = pstmt.getUpdateCount();
-            log.debug(SQLNAME+" influence rows:{}", updateCount);
+            printSql(sql, params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            updateCount = template.update(sql, params);
+            log.debug(String.format("%s <==      Updates:%s", SQLNAME,updateCount));
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
-        } finally {
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException throwables) {
-                log.error(ERRFILENAME, throwables);
-                log.error("ERROR Code: " + throwables.getErrorCode());
-            }
+            handleException(e);
         }
 
         return updateCount > 0 ? true : false;
@@ -193,155 +200,141 @@ public class TdengineDb extends TdengineSevice {
         try {
             TdengineSqlVo tdengineSqlVo = TdengineSqlHelper.entityTosql(entity);
             return this.insertOrUpdate(dsName,tdengineSqlVo.getSql(),tdengineSqlVo.getColumnValeList().toArray());
-        } catch (Exception e) {
-            log.error("save exception",e);
+        } catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     @Override
-    public boolean remove(String dsName, TdengineQueryWrapper queryWrapper) {
+    public boolean remove(String dsName, TdengineQueryWrapper queryWrapper){
 
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.DELETE, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
-            Db db = use(dsName);
-            int res = db.execute(sql);
+            printSql(sql, null);
+            JdbcTemplate template = new JdbcTemplate(use(dsName));
+            int res = template.update(sql);
+            log.debug(String.format("%s <==      Deletes:%s", SQLNAME,res));
+
             if(res >0){
                 return true;
             }
-        } catch (Exception e) {
-            log.error("remove exception",e);
+        } catch (SQLException e) {
+            handleException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
         return false;
     }
 
     @Override
-    public <T> T getOne(String dsName, TdengineQueryWrapper<T> queryWrapper) {
+    public <T> T getOne(String dsName, TdengineQueryWrapper<T> queryWrapper){
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return this.getOne(dsName,sql,queryWrapper.getEntityClass());
         } catch (IllegalAccessException e) {
-            log.error("getOne sql error",e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
-    public Map<String, Object> getMap(String dsName, TdengineQueryWrapper<?> queryWrapper) {
+    public Map<String, Object> getMap(String dsName, TdengineQueryWrapper<?> queryWrapper) throws RuntimeException{
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return  this.getOne(dsName, sql);
         } catch (IllegalAccessException e) {
-            log.error("bulid sql error",e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
     public long count(String dsName, TdengineQueryWrapper<?> queryWrapper) {
         try {
-            String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            sql = String.format("select count(*) from (%s)a",sql);
-            log.debug(SQLNAME+" sql:{}", sql);
+            String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.COUNT, queryWrapper);
             Number number = getNumber(dsName, sql);
+
             if(ObjectUtil.isEmpty(number)){
                 return 0L;
             }
             return number.longValue();
-        } catch (Exception e) {
-            log.error("count sql error",e);
+        } catch (IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return 0L;
     }
 
     @Override
-    public Number getNumber(String dsName, TdengineQueryWrapper<?> queryWrapper) {
+    public Number getNumber(String dsName, TdengineQueryWrapper<?> queryWrapper){
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return getNumber(dsName, sql, queryWrapper.getEntityClass());
-        } catch (Exception e) {
-            log.error("getNumber sql error",e);
+        } catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return 0;
     }
 
     @Override
-    public String getString(String dbName, TdengineQueryWrapper<?> queryWrapper) {
+    public String getString(String dbName, TdengineQueryWrapper<?> queryWrapper){
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return getString(dbName, sql, null);
-        } catch (Exception e) {
-            log.error("getNumber sql error",e);
+        } catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
     public <T> List<T> list(String dsName, TdengineQueryWrapper<T> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return list(dsName, sql, queryWrapper.getEntityClass());
-        } catch (Exception e) {
-            log.error("list sql error",e);
+        } catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
-    public List<Entity> listMaps(String dsName, TdengineQueryWrapper<?> queryWrapper) {
+    public List<Map<String, Object>> listMaps(String dsName, TdengineQueryWrapper<?> queryWrapper){
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return list(dsName, sql);
-        } catch (Exception e) {
-            log.error("list sql error",e);
+        }catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
     public <T> List<T> list(String dbName, String sql, Class<T> beanClass, Object... params)  {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            List<T> res = db.query(sql, beanClass, params);
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            List<T> res = template.query(sql, new BeanPropertyRowMapper<>(beanClass), params);
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?res.size():0));
+
             return TdengineResultHelper.covertToList(res, beanClass);
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
+            handleException(e);
         }
 
         return null;
     }
 
     @Override
-    public List<Entity> list(String dbName, String sql, Map<String, Object> params) {
+    public List<Map<String, Object>> list(String dbName, String sql, Object... params)  {
         try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            return db.query(sql, params);
-        } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
-        }
-        return null;
-    }
+            JdbcTemplate template = new JdbcTemplate(use(dbName));
+            printSql(sql, params);
+            ColumnMapRowMapper rowMapper = new ColumnMapRowMapper();
+            List<Map<String, Object>> query = template.query(sql, rowMapper);
+            log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(query)?query.size():0));
 
-    @Override
-    public List<Entity> list(String dbName, String sql, Object... params) {
-        try {
-            Db db = use(dbName);
-            log.debug(SQLNAME+" sql:{},params:{}", sql, JSONObject.toJSONString(params));
-            return db.query(sql, params);
+            return query;
         } catch (SQLException e) {
-            log.error(ERRFILENAME, e);
-            log.error("ERROR Code: " + e.getErrorCode());
+            handleException(e);
         }
         return null;
     }
@@ -350,12 +343,11 @@ public class TdengineDb extends TdengineSevice {
     public <T> PageResult<T> page(String dsName, Page page, TdengineQueryWrapper<T> queryWrapper) {
         try {
             String sql = TdengineSqlHelper.wrapperToSql(SqlTypeEnum.SELECT, queryWrapper);
-            log.debug(SQLNAME+" sql:{}", sql);
+
             return page(dsName, page, queryWrapper.getEntityClass(),sql);
-        } catch (Exception e) {
-            log.error("page sql error",e);
+        } catch(IllegalAccessException e){
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -378,70 +370,60 @@ public class TdengineDb extends TdengineSevice {
     }
 
     @Override
-    public PageResult<Entity> page(String dbName, Page page, String sql, Object... params) {
+    public PageResult<Map<String, Object>> page(String dbName, Page page, String sql, Object... params)  {
         PageResult<Entity> result = new PageResult<>();
-        try {
-            String pageSql = TdengineSqlHelper.covertPageSql(page, sql);
-            int totalSize = getTotalSize(dbName,page,sql,params);
-            //查询该页数据
+        String pageSql = TdengineSqlHelper.covertPageSql(page, sql);
+        int totalSize = getTotalSize(dbName,page,sql,params);
+        //查询该页数据
 
-            List<Entity> list = this.list(dbName,pageSql, params);
-            return  TdengineResultHelper.setPageData(page, totalSize, list);
-        } catch (Exception e) {
-            log.error(SQLNAME+" 分页异常", e);
-        }
-
-        return result;
+        List<Map<String, Object>> list = this.list(dbName,pageSql, params);
+        return  TdengineResultHelper.setPageData(page, totalSize, list);
     }
 
     @Override
-    public <T> List<T> batchList(String dbName, Page page, Class<T> beanClass, String sql, Object... params) {
+    public <T> List<T> batchList(String dbName, Page page, Class<T> beanClass, String sql, Object... params)  {
         int totalSize = 0;
         List<T> resList = new ArrayList<>();
-        try {
-            StringBuilder order = new StringBuilder("");
-            if(ArrayUtil.isNotEmpty(page.getOrders())){
-                order.append(" order by ");
-                for (int i = 0; i < page.getOrders().length; i++) {
-                    if(i != page.getOrders().length-1){
-                        order.append( page.getOrders()[i].toString()).append(" ,");
-                    }else{
-                        order.append( page.getOrders()[i].toString());
-                    }
+        StringBuilder order = new StringBuilder("");
+        if(ArrayUtil.isNotEmpty(page.getOrders())){
+            order.append(" order by ");
+            for (int i = 0; i < page.getOrders().length; i++) {
+                if(i != page.getOrders().length-1){
+                    order.append( page.getOrders()[i].toString()).append(" ,");
+                }else{
+                    order.append( page.getOrders()[i].toString());
                 }
             }
+        }
 
-            //计算总条数
-            int from = sql.toLowerCase().indexOf("from");
+        //计算总条数
+        int from = sql.toLowerCase().indexOf("from");
 
-            StringBuilder countSql= new StringBuilder("select count(*)  ").append(sql.substring(from));
-            Number number = this.getNumber(countSql.toString(), params);
-            if(ObjectUtil.isNotEmpty(number)){
-                totalSize = number.intValue();
-            }
-            int pageSize = page.getPageSize();
-            // 开始页数
-            int pageNumber = page.getPageNumber();
+        StringBuilder countSql= new StringBuilder("select count(*)  ").append(sql.substring(from));
+        Number number = this.getNumber(countSql.toString(), params);
+        if(ObjectUtil.isNotEmpty(number)){
+            totalSize = number.intValue();
+        }
+        int pageSize = page.getPageSize();
+        // 开始页数
+        int pageNumber = page.getPageNumber();
 
-            // 总页数
-            int totalPage = PageUtil.totalPage(totalSize, pageSize);
+        // 总页数
+        int totalPage = PageUtil.totalPage(totalSize, pageSize);
 
 
-            // 批量查询数据
-            if(totalPage>0){
-                while (pageNumber<totalPage+1){
-                    StringBuilder pageSql = new StringBuilder(sql).append(order.toString()).append(" limit ").append(pageSize).append(" offset ").append(TdengineResultHelper.getStart(new Page(pageNumber,pageSize)));
-                    log.debug("开始第{}页批量查询所有数据(自带分页)，共{}页",pageNumber,totalPage);
-                    //查询该页数据
-                    List<T> list = this.list(pageSql.toString(), beanClass, params);
-                    if(CollUtil.isNotEmpty(list)){
-                        CollUtil.addAll(resList,list);
-                    }
-                    pageNumber ++;
+        // 批量查询数据
+        if(totalPage>0){
+            while (pageNumber<totalPage+1){
+                StringBuilder pageSql = new StringBuilder(sql).append(order.toString()).append(" limit ").append(pageSize).append(" offset ").append(TdengineResultHelper.getStart(new Page(pageNumber,pageSize)));
+                log.debug("开始第{}页批量查询所有数据(自带分页)，共{}页",pageNumber,totalPage);
+                //查询该页数据
+                List<T> list = this.list(pageSql.toString(), beanClass, params);
+                if(CollUtil.isNotEmpty(list)){
+                    CollUtil.addAll(resList,list);
                 }
+                pageNumber ++;
             }
-        } catch (Exception e) {
-            log.error(SQLNAME+" 批量查询所有数据(自带分页)异常", e);
         }
         return resList;
     }
@@ -502,10 +484,8 @@ public class TdengineDb extends TdengineSevice {
             return true;
 
         } catch (Exception e) {
-            log.error(SQLNAME+" 批量保存数据异常", e);
+            throw new TdengineException(SQLNAME+" 批量保存数据异常", e);
         }
-
-        return false;
     }
 
     /**
@@ -521,7 +501,7 @@ public class TdengineDb extends TdengineSevice {
      * @version 1.0
      * @since  2023/6/14 15:53
      */
-    private int getTotalSize(String dbName,Page page, String sql, Object... params){
+    private int getTotalSize(String dbName,Page page, String sql, Object... params)  {
         int totalSize = 0;
 
         //计算总条数
