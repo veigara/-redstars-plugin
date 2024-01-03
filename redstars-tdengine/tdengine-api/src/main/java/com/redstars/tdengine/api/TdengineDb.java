@@ -22,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.*;
@@ -78,10 +80,10 @@ public class TdengineDb extends TdengineSevice {
         try {
             JdbcTemplate template = new JdbcTemplate(use(dbName));
             printSql(sql, params);
-            Map<String, Object> res = template.queryForMap(sql, params);
+            List<Map<String,Object>> res =  template.query(sql,params,new ColumnMapRowMapper());
             log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
 
-            return res;
+            return CollUtil.isNotEmpty(res)?res.get(0):null;
         } catch (SQLException e) {
             handleException(e);
         }
@@ -132,10 +134,10 @@ public class TdengineDb extends TdengineSevice {
         try {
             JdbcTemplate template = new JdbcTemplate(use(dbName));
             printSql(sql, params);
-            T res = (T) template.queryForObject(sql,params,new BeanPropertyRowMapper<T>(beanClass));
+            List<T> res =  template.query(sql,params,new BeanPropertyRowMapper<T>(beanClass));
             log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
 
-            return TdengineResultHelper.covertObj(res, beanClass);
+            return TdengineResultHelper.covertObj(CollUtil.isNotEmpty(res)?res.get(0):null, beanClass);
         } catch (SQLException e) {
             handleException(e);
         }
@@ -147,10 +149,10 @@ public class TdengineDb extends TdengineSevice {
         try {
             JdbcTemplate template = new JdbcTemplate(use(dbName));
             printSql(sql, params);
-            Number res = (Number) template.queryForObject(sql,params,Number.class);
+            List<Number> res =  template.query(sql,params,new SingleColumnRowMapper<>(Number.class));
             log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
 
-            return res;
+            return CollUtil.isNotEmpty(res)?res.get(0):null;
         } catch (SQLException e) {
             handleException(e);
         }
@@ -162,10 +164,10 @@ public class TdengineDb extends TdengineSevice {
         try {
             JdbcTemplate template = new JdbcTemplate(use(dbName));
             printSql(sql, params);
-            String res = (String) template.queryForObject(sql,params,String.class);
+            List<String> res =  template.query(sql,params,new SingleColumnRowMapper<>(String.class));
             log.debug(String.format("%s <==      Total:%s", SQLNAME,ObjectUtil.isNotNull(res)?1:0));
 
-            return res;
+            return CollUtil.isNotEmpty(res)?res.get(0):null;
         } catch (SQLException e) {
             handleException(e);
         }
